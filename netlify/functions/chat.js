@@ -1,4 +1,5 @@
 const https = require('https');
+const { getStore } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -11,7 +12,7 @@ exports.handler = async (event) => {
   };
 
   try {
-    const { prompt } = JSON.parse(event.body);
+    const { prompt, query } = JSON.parse(event.body);
     if (!prompt) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing prompt' }) };
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -49,6 +50,17 @@ exports.handler = async (event) => {
       req.write(requestBody);
       req.end();
     });
+
+    // Log the query for training data (fire-and-forget, won't fail the request)
+    if (query) {
+      try {
+        const store = getStore('queries');
+        const key = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        await store.setJSON(key, { query, timestamp: new Date().toISOString() });
+      } catch (e) {
+        console.error('Log error:', e.message);
+      }
+    }
 
     return { statusCode: 200, headers, body: JSON.stringify({ content: text }) };
   } catch (err) {

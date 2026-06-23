@@ -403,7 +403,7 @@ class Component extends DCLogic {
           fetch('/.netlify/functions/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: this.buildPrompt(q) })
+            body: JSON.stringify({ prompt: this.buildPrompt(q), query: q })
           }),
           new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
         ]);
