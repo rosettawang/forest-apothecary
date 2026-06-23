@@ -342,7 +342,7 @@ class Component extends DCLogic {
 
   consult = () => {
     const q = (this.state.query || '').trim();
-    if (q && window.claude && typeof window.claude.complete === 'function') { this.aiConsult(q); return; }
+    if (q) { this.aiConsult(q); return; }
     this.localConsult();
   };
 
@@ -392,10 +392,25 @@ class Component extends DCLogic {
   aiConsult = async (q) => {
     this.setState({ phase:'loading', showNudge:false });
     try {
-      const raw = await Promise.race([
-        window.claude.complete(this.buildPrompt(q)),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
-      ]);
+      let raw;
+      if (window.claude && typeof window.claude.complete === 'function') {
+        raw = await Promise.race([
+          window.claude.complete(this.buildPrompt(q)),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
+        ]);
+      } else {
+        const res = await Promise.race([
+          fetch('/.netlify/functions/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: this.buildPrompt(q) })
+          }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
+        ]);
+        if (!res.ok) throw new Error('api error');
+        const data = await res.json();
+        raw = data.content;
+      }
       const d = this.parseAI(raw);
       const pool = [d.primaryId, ...d.alts].filter((v, i, a) => a.indexOf(v) === i);
       this.setState({ phase:'result', showNudge:false, result:{
