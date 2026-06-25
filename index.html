@@ -29,6 +29,12 @@
 
     <div style="position:relative;">
 
+      <!-- ============ VIEW TOGGLE ============ -->
+      <div style="display:flex; justify-content:center; margin-bottom:clamp(18px,3vw,28px);">
+        <button type="button" onClick="{{ onReset }}" style="{{ tabApothecaryStyle }}">Apothecary</button>
+        <button type="button" onClick="{{ onViewMenu }}" style="{{ tabMenuStyle }}">Full Menu</button>
+      </div>
+
       <!-- ============ HEADER ============ -->
       <div style="text-align:center;">
         <img src="assets/mark-ink.png" alt="Laurelate" style="height:clamp(50px,7.5vw,66px); width:auto; display:block; margin:0 auto 14px;">
@@ -147,6 +153,34 @@
           <div style="text-align:center; margin-top:clamp(26px,4vw,36px);">
             <button type="button" onClick="{{ onReset }}" style="font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:#512D20; background:none; border:1px solid rgba(81,45,32,.5); border-radius:2px; padding:13px 28px; cursor:pointer; transition:background .2s ease, color .2s ease, border-color .2s ease;" style-hover="background:#1F1C17; color:#FFFBF5; border-color:#1F1C17">↺&nbsp;&nbsp;Ask again</button>
           </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ MENU ============ -->
+      <sc-if value="{{ isMenu }}">
+        <div style="margin-top:clamp(24px,4vw,38px);">
+          <sc-for list="{{ menuSections }}" as="msec">
+            <div style="margin-bottom:clamp(28px,4.5vw,44px);">
+              <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.34em; text-transform:uppercase; color:#8A7055; margin-bottom:16px; padding-bottom:11px; border-bottom:1px solid rgba(175,148,111,.4);">{{ msec.category }}</div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(264px,1fr)); gap:14px;">
+                <sc-for list="{{ msec.drinks }}" as="md">
+                  <div style="background:#FFF8E2; border:1px solid rgba(81,45,32,.28); border-radius:2px; padding:20px 20px 17px;">
+                    <div style="font-family:'Stoke', serif; font-size:clamp(19px,2.4vw,22px); line-height:1.06; color:#1F1C17;">{{ md.name }}</div>
+                    <sc-if value="{{ md.hasLatin }}">
+                      <div style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:13px; color:#8A7055; margin-top:4px;">{{ md.latin }}</div>
+                    </sc-if>
+                    <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:clamp(15px,1.9vw,16.5px); line-height:1.52; color:#33302a; margin:10px 0 0;">{{ md.desc }}</p>
+                    <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.02em; color:#AF946F; margin-top:10px;">{{ md.ingredients }}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:11px;">
+                      <sc-for list="{{ md.benefits }}" as="mb">
+                        <span style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.03em; color:#486235; border:1px solid rgba(72,98,53,.35); border-radius:2px; padding:3px 8px;">{{ mb }}</span>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
         </div>
       </sc-if>
 
@@ -433,6 +467,7 @@ class Component extends DCLogic {
 
   promote = (id) => this.setState(s => ({ result: { ...s.result, primaryId: id } }));
   reset = () => this.setState({ phase:'intake', showNudge:false });
+  viewMenu = () => this.setState({ phase:'menu' });
 
   whyForResult = (d, result) => {
     if (result.source === 'ai') {
@@ -457,10 +492,28 @@ class Component extends DCLogic {
       return { id, label:this.LABELS[id], selected:isSel, style, onClick:() => this.toggle(id) };
     });
 
+    const isMenuPhase = phase === 'menu';
+    const _tb = "font-family:'IBM Plex Sans', sans-serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; padding:10px 24px; cursor:pointer; outline:none; transition:background .2s ease, color .2s ease; ";
+    const tabApothecaryStyle = _tb + (!isMenuPhase
+      ? 'background:#1F1C17; color:#FFFBF5; border:1px solid #1F1C17; border-radius:2px 0 0 2px;'
+      : 'background:transparent; color:#512D20; border:1px solid rgba(81,45,32,.4); border-right:none; border-radius:2px 0 0 2px;');
+    const tabMenuStyle = _tb + (isMenuPhase
+      ? 'background:#1F1C17; color:#FFFBF5; border:1px solid #1F1C17; border-radius:0 2px 2px 0;'
+      : 'background:transparent; color:#512D20; border:1px solid rgba(81,45,32,.4); border-radius:0 2px 2px 0;');
+    const CATS = ['Signature', 'Forest Tea', 'Sparkling Botanical'];
+    const menuSections = CATS.map(cat => ({
+      category: cat,
+      drinks: this.DRINKS.filter(d => d.category === cat).map(d => ({
+        id:d.id, name:d.name, latin:d.latin||'', hasLatin:!!d.latin,
+        desc:d.desc, ingredients:d.ingredients, benefits:d.benefits
+      }))
+    }));
+
     const base = {
       isIntake: phase === 'intake', isResult: phase === 'result', isLoading: phase === 'loading',
-      query, chips, showNudge,
-      onQuery:this.onQuery, onKey:this.onKey, onConsult:this.consult, onSurprise:this.surprise, onReset:this.reset
+      isMenu: isMenuPhase,
+      query, chips, showNudge, menuSections, tabApothecaryStyle, tabMenuStyle,
+      onQuery:this.onQuery, onKey:this.onKey, onConsult:this.consult, onSurprise:this.surprise, onReset:this.reset, onViewMenu:this.viewMenu
     };
 
     if (phase !== 'result' || !result) return base;
