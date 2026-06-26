@@ -44,12 +44,14 @@ exports.handler = async (event) => {
   if (!token) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Authentication required' }) };
 
   try {
+    // GET — fetch all consultations for this user
     if (event.httpMethod === 'GET') {
       const res = await supabaseRequest('/rest/v1/consultations?select=*&order=created_at.desc', 'GET', null, token);
       if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to fetch consultations' }) };
       return { statusCode: 200, headers: CORS, body: JSON.stringify(res.body || []) };
     }
 
+    // POST — save a new consultation
     if (event.httpMethod === 'POST') {
       const { concern, herbs, notes } = JSON.parse(event.body || '{}');
       if (!concern || !herbs) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'concern and herbs required' }) };
@@ -58,6 +60,7 @@ exports.handler = async (event) => {
       return { statusCode: 201, headers: CORS, body: JSON.stringify(Array.isArray(res.body) ? res.body[0] : res.body) };
     }
 
+    // PATCH — mark a consultation as tried (or update notes)
     if (event.httpMethod === 'PATCH') {
       const { id, tried, notes } = JSON.parse(event.body || '{}');
       if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required' }) };

@@ -8,194 +8,382 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Stoke:wght@300;400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Stoke:wght@300;400&display=swap" rel="stylesheet">
 <style>
+  body { margin: 0; background: #fff8e2; }
   *{box-sizing:border-box}
-  html, body{margin:0}
-  body{background:#FFF8E2;}
-  ::selection{background:#BC8057; color:#FFFBF5}
-  input::placeholder{color:#9E8060; opacity:1; font-style:italic;}
-  @keyframes lrlRise{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
-  @keyframes lrlFade{from{opacity:0} to{opacity:1}}
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes lrlPulse{0%,100%{opacity:.5; transform:scale(.95)} 50%{opacity:1; transform:scale(1)}}
+  textarea::placeholder, input::placeholder { color: #9aa08c; }
+  ::selection{ background:#8a9279; color:#fffbeb; }
+  /* neumorphic surfaces */
+  .neu-card{ background:#fffbeb; border-radius:24px; box-shadow:9px 9px 20px #ece1c5, -9px -9px 20px #ffffff; }
+  .neu-tile{ background:#fffbeb; border-radius:18px; box-shadow:6px 6px 14px #ece1c5, -6px -6px 14px #ffffff; }
+  .neu-inset{ background:#fffbeb; border-radius:18px; box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff; }
+  .neu-btn{ background:#fffbeb; border:none; cursor:pointer; color:#191514; box-shadow:5px 5px 11px #efe7cd, -5px -5px 11px #ffffff, inset 1.5px 1.5px 1px #ffffff, inset -1.5px -1.5px 1px rgba(188,172,146,.35), 0 0 0 1px rgba(255,255,255,.9), 0 0 0 2.2px rgba(116,103,78,.5), 0 0 0 3.2px #fff8e2, 0 0 0 4.4px rgba(116,103,78,.42), 0 0 8px 5px rgba(60,50,30,.05); transition:box-shadow .24s cubic-bezier(.12,.7,.25,1), transform .24s cubic-bezier(.12,.7,.25,1); }
+  .neu-btn:active{ box-shadow:inset 5px 5px 15px #e9dfce, inset -5px -5px 15px #ffffff, 0 0 0 3.2px #fff8e2, 0 0 0 4.4px rgba(116,103,78,.17), 0 0 8px 5px rgba(60,50,30,.05); transform:scale(.985); }
+  .webheader{ display:none; }
+  .mobheader{ display:none; }
+  @media (min-width:1100px){ .webheader{ display:block !important; } .appheader{ display:none !important; } .hflower-row{ display:none !important; } .consultbtn{ width:auto !important; align-self:center !important; padding-left:54px !important; padding-right:54px !important; } .centerpanel{ padding-top:40px !important; padding-bottom:52px !important; } .inputview{ margin-top:48px !important; max-width:620px !important; } }
+  @media (max-width:1099px){ .mobheader{ display:block !important; } .sideflower{ display:none !important; } .bgroot{ background-image:none !important; } .centerpanel{ -webkit-mask-image:none !important; mask-image:none !important; padding-top:34px !important; padding-left:20px !important; padding-right:20px !important; } .chip{ font-size:12px !important; width:100% !important; text-align:center !important; } .chip-row{ display:grid !important; grid-template-columns:1fr 1fr !important; column-gap:18px !important; row-gap:14px !important; max-width:440px !important; margin-left:auto !important; margin-right:auto !important; } }
 </style>
 </helmet>
 
-<div data-screen-label="Forest Apothecary" style="min-height:100vh; display:grid; place-items:start center; padding:clamp(14px,3.5vw,48px); background:radial-gradient(125% 120% at 50% 0%, #FFF8E2 0%, #FFF8E2 58%, #EDE3C8 100%); font-family:'IBM Plex Sans', system-ui, sans-serif; color:#1F1C17;">
-  <div style="position:relative; width:100%; max-width:980px; background:#FFFBF5; border:1px solid rgba(81,45,32,.4); border-radius:2px; box-shadow:0 34px 80px -44px rgba(31,28,23,.6); padding:clamp(24px,4.5vw,56px);">
-    <div style="position:absolute; inset:9px; border:1px solid rgba(175,148,111,.45); border-radius:1px; pointer-events:none;"></div>
+<div class="bgroot" style="position:relative;min-height:100vh;background-color:#fff8e2;background-image:url('assets/texture-baked.jpg?v=2');background-size:cover;background-position:center;background-attachment:fixed;font-family:'Jost',sans-serif;color:#191514;display:flex;flex-direction:column;align-items:center;padding:0">
 
-    <div style="position:relative;">
+  <!-- ============ WEB HEADER ============ -->
+  <div class="webheader" style="width:100%;position:sticky;top:0;z-index:20;background:#fff8e2">
+    <div style="text-align:center;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.24em;font-size:10px;text-transform:uppercase;color:#8a7b62;padding:8px 12px;border-bottom:1px solid rgba(116,103,78,.12)">Forest Apothecary · California Native Botanicals</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;padding:15px 46px;max-width:1400px;margin:0 auto;border-bottom:1px solid rgba(116,103,78,.16)">
+      <div onClick="{{ navApothecary }}" title="Apothecary" style="display:flex;align-items:center;gap:13px;justify-self:start;cursor:pointer">
+        <img src="assets/laurelate-mark-trim.png" alt="" style="height:44px;width:auto;display:block">
+        <img src="assets/laurelate-wordmark.png" alt="Laurelate" style="height:22px;width:auto;display:block">
+      </div>
+      <nav style="display:flex;align-items:center;gap:24px;justify-self:center;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:#3c4a3a">
+        <span onClick="{{ navApothecary }}" style="cursor:pointer;transition:color .2s ease" style-hover="color:#8a9279">Apothecary</span>
+        <span onClick="{{ navMenu }}" style="cursor:pointer;transition:color .2s ease" style-hover="color:#8a9279">Menu</span>
+        <span onClick="{{ navJournal }}" style="cursor:pointer;transition:color .2s ease" style-hover="color:#8a9279">My Journal</span>
+      </nav>
+      <div style="display:flex;align-items:center;gap:22px;justify-self:end">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+      </div>
+    </div>
+  </div>
 
-      <!-- ============ VIEW TOGGLE ============ -->
-      <div style="display:flex; justify-content:center; margin-bottom:clamp(18px,3vw,28px);">
-        <button type="button" onClick="{{ onReset }}" style="{{ tabApothecaryStyle }}">Apothecary</button>
-        <button type="button" onClick="{{ onViewMenu }}" style="{{ tabMenuStyle }}">Full Menu</button>
+  <!-- ============ MOBILE HEADER + DRAWER ============ -->
+  <div class="mobheader" style="width:100%;position:sticky;top:0;z-index:20;background:#fff8e2;padding-top:max(8px, env(safe-area-inset-top))">
+    <div style="text-align:center;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.18em;font-size:8.5px;text-transform:uppercase;color:#8a7b62;padding:7px 10px;border-bottom:1px solid rgba(116,103,78,.12)">Forest Apothecary · California Native Botanicals</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:11px 18px;border-bottom:1px solid rgba(116,103,78,.16)">
+      <div onClick="{{ toggleDrawer }}" style="justify-self:start;display:flex;cursor:pointer">
+        <svg width="21" height="21" viewBox="0 0 24 24" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" fill="none"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
+      </div>
+      <div onClick="{{ navApothecary }}" title="Apothecary" style="justify-self:center;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+        <img src="assets/laurelate-mark-trim.png" alt="" style="height:34px;width:auto;display:block">
+        <img src="assets/laurelate-wordmark.png" alt="Laurelate" style="height:15px;width:auto;display:block">
+      </div>
+      <div style="justify-self:end;display:flex;cursor:pointer">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+      </div>
+    </div>
+    <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(25,21,20,.4);z-index:30;opacity:{{ overlayOpacity }};visibility:{{ overlayVis }};transition:opacity .3s ease,visibility .3s ease"></div>
+    <div style="position:fixed;top:0;left:0;height:100%;width:80%;max-width:320px;background:#fffdf6;z-index:31;box-shadow:8px 0 30px rgba(60,50,30,.28);transform:{{ drawerTransform }};transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:max(40px,env(safe-area-inset-top)) 0 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 24px 20px;border-bottom:1px solid rgba(116,103,78,.16)">
+        <img src="assets/laurelate-wordmark.png" alt="Laurelate" style="height:18px;width:auto;display:block">
+        <div onClick="{{ closeDrawer }}" style="cursor:pointer;display:flex"><svg width="20" height="20" viewBox="0 0 24 24" stroke="#3c4a3a" stroke-width="1.6" stroke-linecap="round" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+      </div>
+      <nav style="display:flex;flex-direction:column;padding:8px 0">
+        <div onClick="{{ navApothecary }}" style="cursor:pointer;font-family:'Averia Serif Libre',serif;font-size:19px;color:#3c4a3a;padding:16px 24px;border-bottom:1px solid rgba(116,103,78,.1)" style-hover="background:#f3ece0;color:#8a9279">Apothecary</div>
+        <div onClick="{{ navMenu }}" style="cursor:pointer;font-family:'Averia Serif Libre',serif;font-size:19px;color:#3c4a3a;padding:16px 24px;border-bottom:1px solid rgba(116,103,78,.1)" style-hover="background:#f3ece0;color:#8a9279">Menu</div>
+        <div onClick="{{ navJournal }}" style="cursor:pointer;font-family:'Averia Serif Libre',serif;font-size:19px;color:#3c4a3a;padding:16px 24px;border-bottom:1px solid rgba(116,103,78,.1)" style-hover="background:#f3ece0;color:#8a9279">My Journal</div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ============ CENTER PANEL ============ -->
+  <div class="centerpanel" style="width:min(1100px,100%);min-height:100vh;position:relative;z-index:1;background-color:#fff8e2;display:flex;flex-direction:column;align-items:center;padding:52px 22px 40px">
+
+    <!-- app header (mobile/tablet) -->
+    <div class="appheader" style="display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center">
+      <div onClick="{{ navApothecary }}" title="Apothecary" class="logomark" style="width:74px;height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <img src="assets/laurelate-mark-trim.png" alt="Laurelate" style="width:100%;height:100%;object-fit:contain;display:block">
+      </div>
+      <img onClick="{{ navApothecary }}" src="assets/laurelate-wordmark.png" alt="Laurelate" class="wordmark" style="height:30px;width:auto;object-fit:contain;display:block;cursor:pointer">
+      <div class="tagline" style="font-family:'IBM Plex Sans',sans-serif;letter-spacing:.16em;font-size:11px;text-transform:uppercase;color:#191514">Forest Apothecary · California Native Botanicals</div>
+      <div class="hflower-row" style="display:flex;justify-content:space-between;align-items:center;width:300px;max-width:80vw;margin-top:8px">
+        <img src="assets/flower.png" alt="" style="width:26px;height:auto;display:block;animation:spin 48s linear infinite">
+        <img src="assets/flower.png" alt="" style="width:26px;height:auto;display:block;animation:spin 60s linear infinite reverse">
+        <img src="assets/flower.png" alt="" style="width:26px;height:auto;display:block;animation:spin 54s linear infinite">
+      </div>
+    </div>
+
+    <!-- ============ INTAKE ============ -->
+    <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <div class="inputview" style="width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;margin-top:42px;animation:fadeUp .5s ease both">
+      <h1 class="headline" style="font-family:'Stoke',serif;font-weight:400;font-size:clamp(30px,6vw,44px);line-height:1.12;text-align:center;margin:0 0 18px;color:#191514;-webkit-text-stroke:1.1px #191514;paint-order:stroke fill">What does your<br>body need today?</h1>
+      <p class="intro" style="text-align:center;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;line-height:1.6;color:#6b7360;max-width:600px;margin:0 0 36px">Tell the Apothecary how you feel, in your own words, or tap a concern. It reads your note and suggests a plant from our menu, with a note on why.</p>
+
+      <div class="selectlabel" style="font-family:'IBM Plex Sans',sans-serif;letter-spacing:.16em;font-size:11px;text-transform:uppercase;color:#9aa08c;margin-bottom:28px">Select as many as you want</div>
+      <div class="chip-row" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-bottom:30px">
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="11">
+          <button class="chip" onClick="{{ c.toggle }}" style="border:none;cursor:pointer;border-radius:15px;background:#fffbeb;padding:12px 21px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;letter-spacing:.04em;color:{{ c.color }};box-shadow:{{ c.shadow }};transition:box-shadow .24s cubic-bezier(.12,.7,.25,1),transform .24s cubic-bezier(.12,.7,.25,1),color .3s ease" style-active="transform:scale(.97)">{{ c.label }}</button>
+        </sc-for>
       </div>
 
-      <!-- ============ HEADER ============ -->
-      <div style="text-align:center;">
-        <img src="assets/mark-ink.png" alt="Laurelate" style="height:clamp(50px,7.5vw,66px); width:auto; display:block; margin:0 auto 14px;">
-        <div style="font-family:'Stoke', serif; font-size:clamp(24px,4.2vw,38px); letter-spacing:.24em; padding-left:.24em; line-height:1; color:#1F1C17;">LAURELATE</div>
-        <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.32em; text-transform:uppercase; color:#512D20; margin-top:11px;">Forest Apothecary · California-Native Botanicals</div>
-        <div style="display:flex; align-items:center; gap:14px; max-width:300px; margin:18px auto 0;">
-          <div style="flex:1; height:1px; background:rgba(175,148,111,.6);"></div>
-          <div style="color:#BC8057; font-size:12px;">✦</div>
-          <div style="flex:1; height:1px; background:rgba(175,148,111,.6);"></div>
-        </div>
+      <div style="width:100%;border-radius:22px;background:#fffbeb;box-shadow:inset 6px 6px 13px #ebe1c4, inset -6px -6px 13px #ffffff;padding:6px">
+        <textarea class="noteinput" value="{{ note }}" onChange="{{ onNote }}" placeholder="Want to tell us a little more about how you're feeling?" rows="3" style="width:100%;border:none;outline:none;resize:none;background:transparent;font-family:'Jost',sans-serif;font-size:15.5px;line-height:1.6;color:#191514;padding:16px 18px"></textarea>
       </div>
 
-      <!-- ============ INTAKE ============ -->
-      <sc-if value="{{ isIntake }}" hint-placeholder-val="{{ true }}">
-        <div style="text-align:center; max-width:660px; margin:clamp(28px,5vw,46px) auto 0">
-          <h1 style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-weight:500; font-size:clamp(30px,5.6vw,52px); line-height:1.1; margin:0; color:#1F1C17;">What is your body asking for today?</h1>
-          <p style="font-family:'IBM Plex Sans', sans-serif; font-size:14px; line-height:1.65; color:#512D20; margin:14px auto 0; max-width:486px;">Tell the apothecary how you feel, in your own words, or tap a concern. It reads your note and suggests a plant from our menu, with a note on why.</p>
+      <button class="consultbtn neu-btn" onClick="{{ onConsult }}" style="width:100%;border-radius:19px;padding:19px 28px;margin-top:26px;display:flex;align-items:center;justify-content:center;gap:11px;font-family:'Averia Serif Libre',serif;font-size:18px;color:#191514">
+        <img src="assets/flower.png" alt="" style="width:22px;height:auto;display:block"> <span style="white-space:nowrap">Consult the Apothecary</span> <img src="assets/flower.png" alt="" style="width:22px;height:auto;display:block;transform:scaleX(-1)">
+      </button>
 
-          <div style="margin-top:clamp(24px,4vw,34px);">
-            <input type="text" value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="e.g. “stressed and can't fall asleep,” “stomach in knots before a big talk”…" style="width:100%; font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:clamp(18px,2.6vw,22px); color:#1F1C17; background:#FFF8E2; border:1px solid rgba(81,45,32,.5); border-radius:2px; padding:16px 18px; outline:none; transition:border-color .2s ease, box-shadow .2s ease;" style-focus="border-color:#BC8057; box-shadow:0 0 0 3px rgba(188,128,87,.15)">
-          </div>
+      <div class="oryoumay" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#9aa08c;margin-top:14px">or you may</div>
+      <button class="notsure neu-btn" onClick="{{ onSurprise }}" style="border-radius:14px;padding:12px 24px;margin-top:14px;font-family:'Jost',sans-serif;font-size:11.7px;letter-spacing:.1em;text-transform:uppercase;color:#7c8470">Let the leaves decide</button>
 
-          <div style="margin-top:clamp(20px,3vw,26px);">
-            <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.28em; text-transform:uppercase; color:#8A7055; margin-bottom:14px;">Or choose what you need</div>
-            <div style="display:flex; flex-wrap:wrap; gap:9px; justify-content:center;">
-              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="11">
-                <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}" style-hover="transform:translateY(-1px)">{{ c.label }}</button>
-              </sc-for>
-            </div>
-          </div>
+      <sc-if value="{{ showNudge }}">
+        <div style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#9E6840;margin-top:16px">Tell us a little about how you feel, or tap a concern above.</div>
+      </sc-if>
+    </div>
+    </sc-if>
 
-          <div style="margin-top:clamp(24px,4vw,32px); display:flex; flex-direction:column; align-items:center; gap:14px;">
-            <button type="button" onClick="{{ onConsult }}" style="font-family:'IBM Plex Sans', sans-serif; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:#FFFBF5; background:#BC8057; border:none; border-radius:2px; padding:15px 34px; cursor:pointer; transition:background .2s ease, transform .15s ease;" style-hover="background:#9E6840; transform:translateY(-1px)">Consult the apothecary</button>
-            <button type="button" onClick="{{ onSurprise }}" style="font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; letter-spacing:.04em; color:#512D20; background:none; border:none; cursor:pointer; text-decoration:underline; text-underline-offset:3px;" style-hover="color:#BC8057">Not sure, surprise me</button>
-            <sc-if value="{{ showNudge }}">
-              <div style="font-family:'IBM Plex Sans', sans-serif; font-size:13px; color:#BC8057; margin-top:2px;">Tell us a little about how you feel, or tap a concern above.</div>
-            </sc-if>
-          </div>
-        </div>
+    <!-- ============ LOADING ============ -->
+    <sc-if value="{{ isConsulting }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:70px">
+      <div style="width:96px;height:96px;border-radius:50%;background:#fffbeb;box-shadow:7px 7px 15px #ece1c5, -7px -7px 15px #ffffff;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:40px;color:#8a9279;animation:spin 9s linear infinite;line-height:1">❧</span>
+      </div>
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:25px;color:#191514">Consulting the Apothecary…</div>
+      <div style="font-size:14px;color:#8a9279;display:flex;align-items:center;gap:11px">
+        <span style="display:inline-block;width:17px;height:17px;border:2px solid #ece1c5;border-top-color:#8a9279;border-radius:50%;animation:spin .9s linear infinite"></span>
+        Reading your note against the season's botanicals.
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ RESULT ============ -->
+    <sc-if value="{{ isResults }}">
+    <div style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-top:40px;animation:fadeUp .5s ease both">
+
+      <div style="font-family:'Jost',sans-serif;letter-spacing:.18em;font-size:11px;text-transform:uppercase;color:#9aa08c;margin-bottom:10px">Your consultation</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,5vw,32px);line-height:1.2;text-align:center;margin:0 0 8px;color:#191514">For <span style="color:#8a9279">{{ matchLabelsText }}</span>, the Apothecary suggests</h2>
+      <sc-if value="{{ aiSourced }}">
+        <div style="font-size:12px;color:#a7a994;margin-bottom:8px">✦ Interpreted from your words</div>
       </sc-if>
 
-      <!-- ============ LOADING ============ -->
-      <sc-if value="{{ isLoading }}">
-        <div style="text-align:center; max-width:520px; margin:clamp(46px,9vw,96px) auto;">
-          <img src="assets/nut-berry.png" alt="" style="height:56px; width:auto; animation:lrlPulse 1.4s ease-in-out infinite;">
-          <div style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:clamp(22px,3.6vw,32px); color:#1F1C17; margin-top:22px;">Consulting the apothecary…</div>
-          <div style="font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; letter-spacing:.04em; color:#512D20; margin-top:10px;">Reading your note against the season's botanicals.</div>
+      <!-- primary card -->
+      <div class="neu-card" style="width:100%;padding:34px 32px;margin-top:18px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="width:96px;height:96px;border-radius:50%;background:#fffbeb;box-shadow:inset 6px 6px 13px #ebe1c4, inset -6px -6px 13px #ffffff;display:flex;align-items:center;justify-content:center;margin-bottom:20px">
+          <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:30px;color:#8a9279;line-height:1">❧</span>
         </div>
-      </sc-if>
+        <div style="font-family:'Jost',sans-serif;letter-spacing:.16em;font-size:11px;text-transform:uppercase;color:#8a9279;margin-bottom:8px">{{ primary.category }}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:#191514;line-height:1.1">{{ primary.name }}</div>
+        <sc-if value="{{ primary.hasLatin }}">
+          <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#9aa08c;margin:4px 0 0">{{ primary.latin }}</div>
+        </sc-if>
+        <p style="font-size:15px;line-height:1.65;color:#5e6655;margin:16px 0 0;max-width:460px">{{ primary.desc }}</p>
 
-      <!-- ============ RESULT ============ -->
-      <sc-if value="{{ isResult }}">
-        <div style="margin-top:clamp(24px,4vw,40px);">
-          <div style="text-align:center">
-            <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.3em; text-transform:uppercase; color:#8A7055;">Your consultation</div>
-            <h2 style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-weight:500; font-size:clamp(23px,3.8vw,34px); line-height:1.18; margin:10px auto 0; max-width:660px; color:#1F1C17;">For <span style="color:#BC8057;">{{ matchLabelsText }}</span>, the apothecary suggests</h2>
-            <sc-if value="{{ aiSourced }}">
-              <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:#AF946F; margin-top:11px;">✦&nbsp;&nbsp;Interpreted from your words</div>
-            </sc-if>
-          </div>
-
-          <!-- PRIMARY -->
-          <div style="{{ heroPanelStyle }}">
-            <img src="assets/nut-parchment.png" alt="" style="position:absolute; right:-18px; top:-14px; height:172px; width:auto; opacity:.1; transform:rotate(8deg); pointer-events:none;">
-            <div style="position:relative;">
-              <div style="font-family:'IBM Plex Sans', sans-serif; font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:#E1CEA2;">{{ primary.category }}</div>
-              <div style="font-family:'Stoke', serif; font-size:clamp(32px,6vw,52px); line-height:1.02; margin-top:10px; color:#FFFBF5;">{{ primary.name }}</div>
-              <sc-if value="{{ primary.hasLatin }}">
-                <div style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:clamp(15px,2.2vw,19px); color:#E1CEA2; margin-top:8px;">{{ primary.latin }}</div>
-              </sc-if>
-              <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:clamp(17px,2.5vw,21px); line-height:1.5; color:rgba(239,235,222,.92); margin:16px 0 0; max-width:560px;">{{ primary.desc }}</p>
-
-              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:18px;">
-                <sc-for list="{{ primary.benefits }}" as="b" hint-placeholder-count="3">
-                  <span style="font-family:'IBM Plex Sans', sans-serif; font-size:11px; letter-spacing:.04em; color:#E1CEA2; border:1px solid rgba(225,206,162,.45); border-radius:2px; padding:5px 10px;">{{ b }}</span>
-                </sc-for>
-              </div>
-
-              <sc-if value="{{ showWhyResolved }}">
-                <div style="margin-top:22px; padding-top:18px; border-top:1px solid rgba(239,235,222,.22);">
-                  <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.26em; text-transform:uppercase; color:#E1CEA2; margin-bottom:8px;">✦&nbsp;&nbsp;Why this plant</div>
-                  <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:clamp(16px,2.3vw,19px); line-height:1.55; color:rgba(239,235,222,.95); margin:0; max-width:580px;">{{ primary.why }}</p>
-                </div>
-              </sc-if>
-
-              <div style="margin-top:20px;">
-                <span style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.26em; text-transform:uppercase; color:#DDE1A2;">With&nbsp;&nbsp;</span>
-                <span style="font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; letter-spacing:.02em; color:rgba(239,235,222,.8);">{{ primary.ingredients }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ALTERNATES -->
-          <sc-if value="{{ hasAlternates }}">
-            <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.28em; text-transform:uppercase; color:#8A7055; text-align:center; margin-top:clamp(24px,4vw,34px);">You might also try</div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(238px,1fr)); gap:16px; margin-top:14px;">
-              <sc-for list="{{ alternates }}" as="alt" hint-placeholder-count="2">
-                <div onClick="{{ alt.onClick }}" style="background:#FFF8E2; border:1px solid rgba(81,45,32,.32); border-radius:2px; padding:20px 20px 18px; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;" style-hover="transform:translateY(-3px); box-shadow:0 14px 30px -20px rgba(31,28,23,.5); border-color:rgba(72,98,53,.55)">
-                  <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:#486235;">{{ alt.category }}</div>
-                  <div style="font-family:'Stoke', serif; font-size:clamp(22px,3vw,26px); line-height:1.05; margin-top:7px; color:#1F1C17;">{{ alt.name }}</div>
-                  <sc-if value="{{ alt.hasLatin }}">
-                    <div style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:14px; color:#512D20; margin-top:5px;">{{ alt.latin }}</div>
-                  </sc-if>
-                  <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:16px; line-height:1.45; color:#33302a; margin:11px 0 0;">{{ alt.desc }}</p>
-                  <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:13px;">
-                    <sc-for list="{{ alt.benefits }}" as="b" hint-placeholder-count="2">
-                      <span style="font-family:'IBM Plex Sans', sans-serif; font-size:10.5px; letter-spacing:.03em; color:#486235; border:1px solid rgba(72,98,53,.38); border-radius:2px; padding:4px 8px;">{{ b }}</span>
-                    </sc-for>
-                  </div>
-                  <div style="font-family:'IBM Plex Sans', sans-serif; font-size:11px; letter-spacing:.02em; color:#AF946F; margin-top:14px;">Tap to make this your pick →</div>
-                </div>
-              </sc-for>
-            </div>
-          </sc-if>
-
-          <div style="text-align:center; margin-top:clamp(26px,4vw,36px);">
-            <button type="button" onClick="{{ onReset }}" style="font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:#512D20; background:none; border:1px solid rgba(81,45,32,.5); border-radius:2px; padding:13px 28px; cursor:pointer; transition:background .2s ease, color .2s ease, border-color .2s ease;" style-hover="background:#1F1C17; color:#FFFBF5; border-color:#1F1C17">↺&nbsp;&nbsp;Ask again</button>
-          </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px">
+          <sc-for list="{{ primary.benefits }}" as="b" hint-placeholder-count="3">
+            <span style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:.03em;color:#8a9279;border:1px solid rgba(138,146,121,.5);border-radius:11px;padding:4px 11px">{{ b }}</span>
+          </sc-for>
         </div>
-      </sc-if>
 
-      <!-- ============ MENU ============ -->
-      <sc-if value="{{ isMenu }}">
-        <div style="margin-top:clamp(24px,4vw,38px);">
-          <sc-for list="{{ menuSections }}" as="msec">
-            <div style="margin-bottom:clamp(28px,4.5vw,44px);">
-              <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.34em; text-transform:uppercase; color:#8A7055; margin-bottom:16px; padding-bottom:11px; border-bottom:1px solid rgba(175,148,111,.4);">{{ msec.category }}</div>
-              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(264px,1fr)); gap:14px;">
-                <sc-for list="{{ msec.drinks }}" as="md">
-                  <div style="background:#FFF8E2; border:1px solid rgba(81,45,32,.28); border-radius:2px; padding:20px 20px 17px;">
-                    <div style="font-family:'Stoke', serif; font-size:clamp(19px,2.4vw,22px); line-height:1.06; color:#1F1C17;">{{ md.name }}</div>
-                    <sc-if value="{{ md.hasLatin }}">
-                      <div style="font-family:'Cormorant Garamond', Georgia, serif; font-style:italic; font-size:13px; color:#8A7055; margin-top:4px;">{{ md.latin }}</div>
-                    </sc-if>
-                    <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:clamp(15px,1.9vw,16.5px); line-height:1.52; color:#33302a; margin:10px 0 0;">{{ md.desc }}</p>
-                    <div style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.02em; color:#AF946F; margin-top:10px;">{{ md.ingredients }}</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:11px;">
-                      <sc-for list="{{ md.benefits }}" as="mb">
-                        <span style="font-family:'IBM Plex Sans', sans-serif; font-size:10px; letter-spacing:.03em; color:#486235; border:1px solid rgba(72,98,53,.35); border-radius:2px; padding:3px 8px;">{{ mb }}</span>
-                      </sc-for>
-                    </div>
-                  </div>
-                </sc-for>
+        <sc-if value="{{ showWhyResolved }}">
+          <div class="neu-inset" style="width:100%;padding:20px 22px;margin-top:22px;text-align:left">
+            <div style="font-family:'Jost',sans-serif;letter-spacing:.14em;font-size:10.5px;text-transform:uppercase;color:#8a9279;margin-bottom:9px">✦ Why this plant</div>
+            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.5;color:#191514;margin:0">{{ primary.why }}</p>
+          </div>
+        </sc-if>
+
+        <div style="font-size:13px;color:#8a9279;margin-top:18px">With {{ primary.ingredients }}</div>
+      </div>
+
+      <!-- alternates -->
+      <sc-if value="{{ hasAlternates }}">
+        <div style="font-family:'Jost',sans-serif;letter-spacing:.16em;font-size:11px;text-transform:uppercase;color:#9aa08c;margin:34px 0 16px">You might also try</div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:16px">
+          <sc-for list="{{ alternates }}" as="alt" hint-placeholder-count="2">
+            <button class="neu-btn" onClick="{{ alt.onClick }}" style="width:100%;text-align:left;border-radius:20px;padding:22px 24px;display:flex;align-items:center;gap:18px">
+              <div style="flex:1">
+                <div style="font-family:'Jost',sans-serif;letter-spacing:.14em;font-size:10px;text-transform:uppercase;color:#8a9279;margin-bottom:5px">{{ alt.category }}</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:500;color:#191514">{{ alt.name }}</div>
+                <sc-if value="{{ alt.hasLatin }}">
+                  <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#9aa08c;margin-bottom:7px">{{ alt.latin }}</div>
+                </sc-if>
+                <div style="font-size:13.5px;line-height:1.55;color:#6b7360">{{ alt.desc }}</div>
+                <div style="font-size:12px;color:#a7a994;margin-top:10px">Tap to make this your pick →</div>
               </div>
-            </div>
+            </button>
           </sc-for>
         </div>
       </sc-if>
 
-      <!-- ============ FOOTER ============ -->
-      <div style="margin-top:clamp(30px,5vw,46px); border-top:1px solid rgba(175,148,111,.5); padding-top:16px; text-align:center;">
-        <p style="font-family:'IBM Plex Sans', sans-serif; font-size:11px; line-height:1.7; color:#7a6f5c; letter-spacing:.01em; margin:0 auto; max-width:582px;">Traditional and descriptive uses only, not medical advice. Ingredients are served individually to honor each plant's distinct properties. All drinks made with oat milk; corn and soy also available.</p>
+      <!-- ============ EXPANDED HERBAL OPTIONS ============ -->
+      <div style="width:100%;margin-top:44px;padding-top:32px;border-top:1px dashed rgba(116,103,78,.35)">
+        <div style="text-align:center">
+          <div style="font-family:'Jost',sans-serif;letter-spacing:.18em;font-size:10.5px;text-transform:uppercase;color:#9aa08c">Beyond the café menu</div>
+          <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:clamp(21px,4.4vw,28px);line-height:1.2;margin:9px 0 0;color:#191514">Expanded herbal options at the apothecary</h3>
+        </div>
+
+        <sc-if value="{{ signedOut }}">
+          <div class="neu-inset" style="margin-top:22px;padding:30px 28px;text-align:center">
+            <div style="font-size:22px;color:#8a9279">✦</div>
+            <p style="font-family:'Cormorant Garamond',serif;font-size:17px;line-height:1.55;color:#3c4a3a;margin:10px auto 0;max-width:480px">Create your journal to unlock guidance across our full apothecary — loose teas and bulk herbs beyond the café menu, matched to how you feel. We'll recommend the right herb for you, and tell you whether we have it on hand.</p>
+            <button class="neu-btn" onClick="{{ onGoJournal }}" style="border-radius:16px;padding:14px 30px;margin-top:22px;font-family:'Averia Serif Libre',serif;font-size:15px;color:#191514">Create journal · sign in</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ signedIn }}">
+          <p style="text-align:center;font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.6;color:#6b7360;margin:14px auto 0;max-width:520px">For <span style="color:#8a9279">{{ expandLabel }}</span>, the apothecary can also suggest these — prepared as loose tea or sold in bulk. Each is marked with whether we currently stock it.</p>
+          <sc-if value="{{ hasExpanded }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:16px;margin-top:20px">
+              <sc-for list="{{ expandedMatches }}" as="h" hint-placeholder-count="3">
+                <div class="neu-tile" style="padding:20px 20px 18px">
+                  <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;line-height:1.1;color:#191514">{{ h.name }}</div>
+                  <sc-if value="{{ h.hasLatin }}">
+                    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#9aa08c;margin-top:3px">{{ h.latin }}</div>
+                  </sc-if>
+                  <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.55;color:#5e6655;margin:10px 0 0">{{ h.why }}</p>
+                  <div style="font-size:11px;color:#a7a994;margin-top:10px">{{ h.prep }}</div>
+                  <div style="margin-top:11px"><span style="{{ h.stockStyle }}">{{ h.stockLabel }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="text-align:center;margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:10px">
+            <button class="neu-btn" onClick="{{ onSaveRecord }}" style="border-radius:16px;padding:13px 28px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#4d5a47">Save to my journal</button>
+            <sc-if value="{{ savedFlag }}">
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8a9279">✓ Saved to your journal</div>
+            </sc-if>
+            <sc-if value="{{ hasSaveError }}">
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#9E6840">{{ saveError }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
       </div>
 
+      <button class="notsure neu-btn" onClick="{{ onReset }}" style="border-radius:16px;padding:14px 28px;margin-top:40px;font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#7c8470">↺ Ask again</button>
     </div>
+    </sc-if>
+
+    <!-- ============ MENU ============ -->
+    <sc-if value="{{ isMenu }}">
+    <div style="width:100%;max-width:780px;margin-top:36px;animation:fadeUp .5s ease both">
+      <p style="text-align:center;font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.6;color:#6b7360;max-width:540px;margin:0 auto">Dishes and drinks prepared fresh in the shop, each built around the herbs in our consultations.</p>
+      <sc-for list="{{ menuSections }}" as="msec">
+        <div style="margin-top:36px">
+          <div style="font-family:'Jost',sans-serif;letter-spacing:.22em;font-size:10.5px;text-transform:uppercase;color:#8a9279;margin-bottom:16px;padding-bottom:11px;border-bottom:1px solid rgba(138,146,121,.35)">{{ msec.category }}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,1fr));gap:16px">
+            <sc-for list="{{ msec.drinks }}" as="md">
+              <div class="neu-tile" style="padding:22px 22px 18px">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:500;line-height:1.05;color:#191514">{{ md.name }}</div>
+                <sc-if value="{{ md.hasLatin }}">
+                  <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#9aa08c;margin-top:3px">{{ md.latin }}</div>
+                </sc-if>
+                <p style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.55;color:#5e6655;margin:10px 0 0">{{ md.desc }}</p>
+                <div style="font-size:11px;color:#a7a994;margin-top:10px">{{ md.ingredients }}</div>
+                <sc-if value="{{ md.hasAllergens }}">
+                  <div style="margin-top:10px"><span style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;letter-spacing:.03em;color:#9E6840;background:rgba(188,128,87,.12);border:1px solid rgba(188,128,87,.5);border-radius:11px;padding:4px 10px">Contains: {{ md.allergens }}</span></div>
+                </sc-if>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+                  <sc-for list="{{ md.benefits }}" as="mb">
+                    <span style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;letter-spacing:.03em;color:#8a9279;border:1px solid rgba(138,146,121,.4);border-radius:10px;padding:3px 9px">{{ mb }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <!-- ============ MY JOURNAL ============ -->
+    <sc-if value="{{ isJournal }}">
+    <div style="width:100%;max-width:600px;margin-top:40px;animation:fadeUp .5s ease both">
+
+      <sc-if value="{{ signedOut }}">
+        <div style="max-width:430px;margin:0 auto;text-align:center">
+          <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(26px,5vw,36px);line-height:1.1;margin:0;color:#191514">Your wellness journal</h2>
+          <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;line-height:1.6;color:#6b7360;margin:14px auto 0;max-width:380px">Sign in or create an account to keep a record of your consultations and unlock expanded herbal guidance across our full apothecary.</p>
+
+          <div style="margin-top:24px;text-align:left">
+            <div style="font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9aa08c;margin-bottom:8px">Email</div>
+            <div style="border-radius:16px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:4px">
+              <input type="email" autocomplete="email" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" placeholder="you@example.com" style="width:100%;border:none;outline:none;background:transparent;font-family:'Jost',sans-serif;font-size:16px;color:#191514;padding:13px 15px">
+            </div>
+            <div style="font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9aa08c;margin:16px 0 8px">Password</div>
+            <div style="border-radius:16px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:4px">
+              <input type="password" autocomplete="current-password" value="{{ authPassword }}" onChange="{{ onAuthPassword }}" placeholder="••••••••" style="width:100%;border:none;outline:none;background:transparent;font-family:'Jost',sans-serif;font-size:16px;color:#191514;padding:13px 15px">
+            </div>
+          </div>
+
+          <sc-if value="{{ hasAuthError }}">
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#9E6840;margin-top:14px">{{ authError }}</div>
+          </sc-if>
+          <sc-if value="{{ hasAuthMsg }}">
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#8a9279;margin-top:14px">{{ authMsg }}</div>
+          </sc-if>
+
+          <button class="neu-btn" onClick="{{ onAuthSubmit }}" style="border-radius:16px;padding:14px 32px;margin-top:22px;font-family:'Averia Serif Libre',serif;font-size:15px;color:#191514">{{ authSubmitLabel }}</button>
+
+          <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;color:#6b7360;margin-top:18px">{{ authTogglePrompt }} <span onClick="{{ onAuthToggle }}" style="color:#8a9279;cursor:pointer;text-decoration:underline;text-underline-offset:3px">{{ authToggleLabel }}</span></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ signedIn }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px">
+          <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,4.4vw,34px);line-height:1.1;margin:0;color:#191514">Welcome back, {{ accountEmail }}</h2>
+          <button class="neu-btn" onClick="{{ onSignOut }}" style="border-radius:13px;padding:9px 18px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7c8470">Sign out</button>
+        </div>
+        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.6;color:#6b7360;margin:10px 0 0;max-width:560px">Expanded herbal options are unlocked — they'll appear at the bottom of each consultation. Your saved consultations are recorded below.</p>
+
+        <sc-if value="{{ recordsLoading }}">
+          <div class="neu-inset" style="margin-top:24px;padding:24px;text-align:center">
+            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#5e6655;margin:0">Loading your journal…</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ noRecords }}">
+          <div class="neu-inset" style="margin-top:24px;padding:30px;text-align:center">
+            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#5e6655;margin:0">No saved consultations yet.</p>
+            <button class="neu-btn" onClick="{{ onGoApothecary }}" style="border-radius:16px;padding:12px 26px;margin-top:16px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4d5a47">Start a consultation</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasRecords }}">
+          <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ records }}" as="rec" hint-placeholder-count="2">
+              <div class="neu-tile" style="padding:18px 20px">
+                <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#a7a994">{{ rec.date }}</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;line-height:1.15;margin-top:7px;color:#191514">For {{ rec.concern }}</div>
+                <sc-if value="{{ rec.hasHerbs }}">
+                  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;color:#8a9279;margin-top:8px">{{ rec.herbsText }}</div>
+                </sc-if>
+                <div style="margin-top:12px">
+                  <sc-if value="{{ rec.tried }}">
+                    <span style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:.04em;color:#486235;background:rgba(72,98,53,.1);border:1px solid rgba(72,98,53,.38);border-radius:11px;padding:4px 11px">✓ Tried</span>
+                  </sc-if>
+                  <sc-if value="{{ rec.notTried }}">
+                    <button class="neu-btn" onClick="{{ rec.onTried }}" style="border-radius:11px;padding:6px 14px;font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#7c8470">Mark as tried</button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- footer -->
+    <p style="max-width:520px;text-align:center;font-size:11.5px;line-height:1.6;color:#a7a994;margin:56px 0 0">Traditional and descriptive uses only, not medical advice. Ingredients are served individually to honor each plant's distinct properties. All drinks made with oat milk; corn and soy also available.</p>
+
   </div>
+
+  <!-- side flowers (desktop) -->
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;top:30px;left:2.2vw;width:150px;height:auto;z-index:6;opacity:.92;pointer-events:none">
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;top:50%;left:2.2vw;transform:translateY(-50%);width:170px;height:auto;z-index:6;opacity:.92;pointer-events:none">
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;bottom:30px;left:2.2vw;width:150px;height:auto;z-index:6;opacity:.92;pointer-events:none">
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;top:30px;right:2.2vw;width:150px;height:auto;z-index:6;opacity:.92;pointer-events:none;transform:scaleX(-1)">
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;top:50%;right:2.2vw;transform:translateY(-50%) scaleX(-1);width:170px;height:auto;z-index:6;opacity:.92;pointer-events:none">
+  <img class="sideflower" src="assets/flower-stone.png?v=6" alt="" style="position:absolute;bottom:30px;right:2.2vw;width:150px;height:auto;z-index:6;opacity:.92;pointer-events:none;transform:scaleX(-1)">
+
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;heroTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bay Leaf&quot;,&quot;Ink&quot;,&quot;Canyon Teal&quot;,&quot;Laurel Berry&quot;],&quot;default&quot;:&quot;Bay Leaf&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;altCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:3,&quot;tsType&quot;:&quot;number&quot;},&quot;showWhy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { phase: 'intake', query: '', selected: [], showNudge: false, result: null };
+  state = (() => {
+    let token = null, email = null;
+    try { token = window.localStorage.getItem('lrl_token'); email = window.localStorage.getItem('lrl_email'); } catch (e) {}
+    return { view:'apothecary', phase:'intake', query:'', selected:[], showNudge:false, result:null,
+      token: token || null, account: token ? { email } : null,
+      records:[], recordsLoading:false, recordsLoaded:false,
+      authEmail:'', authPassword:'', authMode:'signin', authError:'', authMsg:'', authBusy:false,
+      savedFlag:false, saveBusy:false, saveError:'', drawerOpen:false };
+  })();
 
   CHIP_ORDER = ['calm','sleep','immune','respiratory','energy','keto','menstrual','mood','minerals','tissue','grounding'];
 
@@ -204,33 +392,42 @@ class Component extends DCLogic {
     respiratory:'Respiratory ease', energy:'Energy & focus', keto:'Clean fuel & satiety',
     menstrual:'Menstrual comfort', mood:'Mood lift', minerals:'Minerals & vitality',
     tissue:'Hair, skin & nails', grounding:'Grounding & presence',
-    inflammation:'Inflammation', circulation:'Circulation'
+    inflammation:'Inflammation', circulation:'Circulation',
+    focus:'Focus & memory', digestion:'Digestion & gut', liver:'Liver & detox',
+    urinary:'Urinary & kidney', bowel:'Regularity'
   };
 
   KEYWORDS = {
-    menstrual:['cramp','menstru','period','pms','menses','uterine','that time','monthly'],
+    menstrual:['cramp','menstru','period','pms','menses','uterine','that time','monthly','menopaus','hot flash','perimenopaus','hormon','cycle'],
     immune:['sick','flu','immun','run down','rundown','coming down','fight off','a bug','under the weather','fever','virus','a cold','catching','catch a','sniffl'],
     respiratory:['cough','congest','chest','lung','breath','respir','phlegm','mucus','sinus','stuffy','wheez','bronch','asthma','throat'],
-    energy:['tired','fatigue','energy','focus','foggy','brain fog','sluggish','exhaust','wake','alert','concentrat','productiv','slump','sleepy','drowsy','lethargic'],
-    keto:['keto','mct','fasting','satiety','appetite','fuel','endurance','workout','crash'],
-    calm:['stress','anxious','anxiety','calm','tense','tension','overwhelm','nervous','wound up','relax','unwind','panic','worri','frazzled','on edge'],
-    sleep:['sleep','insomnia','restless','wind down','bedtime','sleepless','toss','awake at night'],
-    mood:['mood','heartbreak','heartbroken','comfort','grief','melanchol','lonely','spirits','cheer'],
+    energy:['tired','fatigue','energy','sluggish','exhaust','wake','alert','productiv','slump','sleepy','drowsy','lethargic','stamina','endurance'],
+    focus:['focus','memory','concentrat','foggy','brain fog','clarity','forget','sharp','mental','studying','study'],
+    keto:['keto','mct','fasting','satiety','fuel','crash'],
+    calm:['stress','anxious','anxiety','calm','tense','tension','overwhelm','nervous','wound up','relax','unwind','panic','worri','frazzled','on edge','burnout','burn out','resilien','adrenal'],
+    sleep:['sleep','insomnia','restless','wind down','bedtime','sleepless','toss','awake at night','mind off','switch off'],
+    mood:['mood','heartbreak','heartbroken','grief','melanchol','lonely','spirits','cheer','depress','sad','low mood','tearful'],
     minerals:['iron','mineral','anemi','vitality','deplet','nourish','nutrition','tonic','restore','rebuild'],
-    tissue:['hair','nail','skin','bone','connective','tissue','collagen','silica','brittle','joint'],
-    inflammation:['inflam','swelling','swollen','sore','achy'],
-    circulation:['circulat','blood flow','cold hands','cold feet'],
-    grounding:['ground','present','presence','center','centre','meditat','scattered','racing','spinning']
+    tissue:['hair','nail','skin','bone','connective','tissue','collagen','silica','brittle','joint','acne','eczema','rash','complexion','wrinkle','wound','scar'],
+    inflammation:['inflam','swelling','swollen','sore','achy','arthrit'],
+    circulation:['circulat','blood flow','cold hands','cold feet','warming'],
+    grounding:['ground','present','presence','center','centre','meditat','scattered','racing','spinning'],
+    digestion:['digest','bloat','gas','indigestion','stomach','gut','nausea','heartburn','reflux','ibs','queasy','appetite'],
+    liver:['liver','detox','cleanse','hangover','bile','gallbladder'],
+    urinary:['urinary','bladder','uti','kidney','water retention','urin','cystitis'],
+    bowel:['constipat','regular','bowel','laxative','backed up']
   };
 
   ADJ = {
     immune:{respiratory:0.6}, respiratory:{immune:0.5},
-    calm:{sleep:0.5, grounding:0.5, mood:0.3}, sleep:{calm:0.5},
+    calm:{sleep:0.5, grounding:0.5, mood:0.3, focus:0.2}, sleep:{calm:0.5},
     grounding:{calm:0.4}, mood:{calm:0.3},
-    energy:{keto:0.5}, keto:{energy:0.5},
+    energy:{keto:0.5, focus:0.4}, keto:{energy:0.5}, focus:{energy:0.4, calm:0.2},
     minerals:{tissue:0.5}, tissue:{minerals:0.4},
     inflammation:{circulation:0.3, minerals:0.2},
-    circulation:{inflammation:0.3}
+    circulation:{inflammation:0.3},
+    digestion:{liver:0.4, bowel:0.3}, liver:{digestion:0.4, bowel:0.2}, bowel:{digestion:0.3, liver:0.2},
+    urinary:{minerals:0.2}
   };
 
   DRINKS = [
@@ -250,61 +447,61 @@ class Component extends DCLogic {
       ingredients:'Theobroma cacao · Colombia',
       desc:'Pure ceremonial cacao. Theobromine lifts the mood and opens the heart, warm, sustained, gentle energy.',
       tags:{mood:3, energy:1, grounding:1}, benefits:['mood lift & emotional warmth','heart-opening & joyful','gentle non-caffeinated energy','grounding ceremonial ritual'],
-      why:{ mood:"Cacao contains N-acylethanolamines including anandamide — the \'bliss molecule\' — along with FAAH inhibitors that slow anandamide\'s enzymatic breakdown, extending its action at CB1 cannabinoid receptors. Phenylethylamine (PEA) promotes dopamine and norepinephrine release in the limbic system. Cacao is also a meaningful source of tryptophan, a serotonin precursor, and its epicatechin and catechin flavanols upregulate BDNF in the hippocampus. Theobromine antagonizes adenosine receptors and raises intracellular cAMP — the layered result is warm and sustained, without caffeine\'s cortisol spike.", energy:"Theobromine has a longer half-life (~7 hours) than caffeine and is a mild vasodilator, producing a soft, circulating warmth rather than a sharp edge. It doesn\'t trigger the same cortisol response as caffeine, making the lift feel lighter and the come-down gentler." } },
+      why:{ mood:"Cacao contains N-acylethanolamines including anandamide — the 'bliss molecule' — along with FAAH inhibitors that slow anandamide's enzymatic breakdown, extending its action at CB1 cannabinoid receptors. Phenylethylamine (PEA) promotes dopamine and norepinephrine release in the limbic system. Theobromine antagonizes adenosine receptors and raises intracellular cAMP — the layered result is warm and sustained, without caffeine's cortisol spike.", energy:"Theobromine has a longer half-life (~7 hours) than caffeine and is a mild vasodilator, producing a soft, circulating warmth rather than a sharp edge. It doesn't trigger the same cortisol response as caffeine, making the lift feel lighter and the come-down gentler." } },
 
     { id:'bay-laurel-hydrosol', category:'Forest Tea', name:'California Bay Laurel Hydrosol', latin:'Umbellularia californica',
       ingredients:'steam-distilled bay laurel · still water',
       desc:'A steam-distilled floral water, deeply calming and mood-softening, a contented present-moment ease reminiscent of kava.',
       tags:{calm:3, grounding:3, mood:2, sleep:1}, benefits:['deep nervous system calm','kava-like present-moment ease','anxiety & stress relief','grounding without sedation','mood softening'],
-      why:{ calm:"California bay laurel\'s steam distillate contains linalool, sabinene, α-terpinene, and eugenol alongside the ketone umbellulone. Linalool binds GABA-A receptors at a benzodiazepine-independent site on the α subunit, increasing chloride conductance and reducing neuronal excitability — the same mechanism confirmed in lavender\'s clinical anxiolytic action. Umbellulone activates TRPA1 ion channels; at hydrosol concentrations, this low-dose TRPA1 stimulation contributes to a settling quality distinct from the vasodilatory response seen at high doses.", grounding:"Linalool and sabinene reach limbic system receptors directly via the olfactory bulb\'s projection to the amygdala and hippocampus, producing an unusually immediate grounding quality alongside the oral route. Linalool\'s GABA-A modulation then acts systemically after absorption, reinforcing what the olfactory pathway initiates.", mood:"Linalool\'s modulation of the HPA axis — attenuating cortisol-driven arousal — and eugenol\'s mild MAO-B inhibition together contribute to the mood-softening effect. At hydrosol concentrations this is a broad-spectrum nervous system governor working through several pathways simultaneously, without the sedation of stronger nervines." } },
+      why:{ calm:"California bay laurel's steam distillate contains linalool, sabinene, α-terpinene, and eugenol alongside the ketone umbellulone. Linalool binds GABA-A receptors at a benzodiazepine-independent site on the α subunit, increasing chloride conductance and reducing neuronal excitability — the same mechanism confirmed in lavender's clinical anxiolytic action.", grounding:"Linalool and sabinene reach limbic system receptors directly via the olfactory bulb's projection to the amygdala and hippocampus, producing an unusually immediate grounding quality alongside the oral route.", mood:"Linalool's modulation of the HPA axis — attenuating cortisol-driven arousal — and eugenol's mild MAO-B inhibition together contribute to the mood-softening effect." } },
 
     { id:'mugwort-matcha', category:'Forest Tea', name:'Mugwort Matcha', latin:'Artemisia douglasiana · Camellia sinensis',
       ingredients:'ceremonial matcha · California mugwort',
       desc:'Ceremonial matcha blended with California mugwort, a TCM favorite for menstrual comfort, calm alertness, and grounded energy.',
       tags:{menstrual:3, calm:2, energy:2, grounding:2}, benefits:['menstrual cramp & cycle comfort','uterine & reproductive tonic','calm focused alertness','grounded energy without jitter'],
-      why:{ menstrual:"Artemisia douglasiana contains guaianolide sesquiterpene lactones — including dehydroartemorin and ridentin — and volatile oils dominated by camphor, 1,8-cineole, and borneol. The lactones block voltage-gated calcium channels in uterine smooth muscle, reducing hypercontractility, while simultaneously inhibiting NF-κB → IκB kinase signaling to lower prostaglandin E2 synthesis, the primary driver of menstrual cramping. This dual antispasmodic-anti-inflammatory action is consistent with its traditional role as a uterine tonic in TCM.", energy:"L-theanine in matcha modulates AMPA receptors and promotes alpha-wave brain activity, taking the edge off caffeine\'s adenosine blockade. The combination produces calm, sustained alertness — a measurably different cognitive state than coffee alone, and one that mugwort\'s grounding bitterness extends further.", calm:"Mugwort\'s guaianolide sesquiterpene lactones have mild antispasmodic effects on smooth muscle, contributing to a settled, un-jittery quality alongside matcha. The result is a grounded lift rather than an edgy one.", grounding:"Mugwort\'s camphor, borneol, and 1,8-cineole act on TRP channels — particularly TRPV1 and TRPM8 — contributing to proprioceptive grounding through a sense of physical warmth and presence that complements matcha\'s mental clarity." } },
+      why:{ menstrual:"Artemisia douglasiana contains guaianolide sesquiterpene lactones — including dehydroartemorin and ridentin — and volatile oils dominated by camphor, 1,8-cineole, and borneol. The lactones block voltage-gated calcium channels in uterine smooth muscle, reducing hypercontractility, while simultaneously inhibiting NF-κB signaling to lower prostaglandin E2 synthesis, the primary driver of menstrual cramping.", energy:"L-theanine in matcha modulates AMPA receptors and promotes alpha-wave brain activity, taking the edge off caffeine's adenosine blockade. The combination produces calm, sustained alertness.", calm:"Mugwort's guaianolide sesquiterpene lactones have mild antispasmodic effects on smooth muscle, contributing to a settled, un-jittery quality alongside matcha.", grounding:"Mugwort's camphor, borneol, and 1,8-cineole act on TRP channels, contributing to proprioceptive grounding through a sense of physical warmth and presence." } },
 
     { id:'black-sage', category:'Forest Tea', name:'Black Sage', latin:'Salvia mellifera',
       ingredients:'wild black sage leaf',
       desc:"A chaparral aromatic from California's coastal hillsides, supports respiratory ease and nervous-system calm.",
       tags:{calm:2, respiratory:2}, benefits:['respiratory ease & airway opening','sinus & breathing support','nervous system settling','aromatic chaparral calm'],
-      why:{ calm:"Black sage contains rosmarinic acid and carnosic acid, both of which activate the Nrf2 antioxidant pathway in neural tissue. Salvia species also inhibit acetylcholinesterase (AChE), preserving cholinergic neurotransmission — associated with parasympathetic tone, cognitive steadiness, and a settled nervous system.", respiratory:"Rosmarinic acid inhibits both COX-2 and 5-lipoxygenase, blocking the leukotriene pathway that drives bronchoconstriction. Black sage\'s volatile terpenes — α-pinene and 1,8-cineole — relax airway smooth muscle via potassium channel activation and phosphodiesterase inhibition, widening the airways and reducing resistance to airflow." } },
+      why:{ calm:"Black sage contains rosmarinic acid and carnosic acid, both of which activate the Nrf2 antioxidant pathway in neural tissue. Salvia species also inhibit acetylcholinesterase (AChE), preserving cholinergic neurotransmission — associated with parasympathetic tone and a settled nervous system.", respiratory:"Rosmarinic acid inhibits both COX-2 and 5-lipoxygenase, blocking the leukotriene pathway that drives bronchoconstriction. Black sage's volatile terpenes — α-pinene and 1,8-cineole — relax airway smooth muscle, widening the airways and reducing resistance to airflow." } },
 
     { id:'yerba-santa', category:'Forest Tea', name:'Yerba Santa', latin:'Eriodictyon californicum',
       ingredients:'resinous yerba santa leaf',
       desc:'A resinous forest tonic, traditionally used for deep lung support, clearing congestion, and respiratory illness recovery.',
       tags:{respiratory:3, immune:1}, benefits:['deep lung & chest support','mucus & congestion clearing','respiratory illness recovery','seasonal airway defense','cold & cough support'],
-      why:{ respiratory:"Eriodictyol and its methyl ether homoeriodictyol — yerba santa\'s primary flavanones — activate CFTR (cystic fibrosis transmembrane conductance regulator) chloride channels in airway epithelium, increasing the water content of mucus and making it easier to clear. Eriodictyone, a chalcone in the resin, adds bronchospasmolytic activity. Eucalyptol (1,8-cineole) inhibits mucin hypersecretion and activates TRPM8 cold-receptor neurons, producing the characteristic chest-clearing sensation. Together they address both viscosity and volume of congestion.", immune:"Yerba santa\'s flavonoid fraction inhibits mast cell degranulation and suppresses NF-κB signaling in airway tissue, reducing the inflammatory cascade that prolongs respiratory illness. This anti-inflammatory action combines with the mucolytic effect to make it particularly well-suited to the middle and recovery stages of a chest illness." } },
+      why:{ respiratory:"Eriodictyol and homoeriodictyol — yerba santa's primary flavanones — activate CFTR chloride channels in airway epithelium, increasing the water content of mucus and making it easier to clear. Eucalyptol (1,8-cineole) inhibits mucin hypersecretion and activates TRPM8 cold-receptor neurons, producing the characteristic chest-clearing sensation.", immune:"Yerba santa's flavonoid fraction inhibits mast cell degranulation and suppresses NF-κB signaling in airway tissue, reducing the inflammatory cascade that prolongs respiratory illness." } },
 
     { id:'stinging-nettle', category:'Forest Tea', name:'Stinging Nettle', latin:'Urtica dioica',
       ingredients:'mineral-dense nettle leaf',
       desc:'A mineral-dense green infusion, supports iron intake, allergy & histamine response, systemic inflammation, and deep tissue nourishment.',
       tags:{minerals:3, inflammation:2, tissue:2}, benefits:['iron & mineral replenishment','allergy & seasonal histamine support','systemic anti-inflammatory','deep tissue nourishment','general vitality'],
-      why:{ minerals:"Nettle leaves are iron-rich and contain vitamin C, which reduces dietary iron from Fe3+ to the Fe2+ form absorbed by DMT1 transporters in the duodenum, making nettle iron more bioavailable than many plant sources. The leaves also supply calcium, magnesium, potassium, and silica at concentrations meaningful for general mineral replenishment.", inflammation:"Nettle leaf extract acts as an H1 histamine receptor antagonist and inhibits mast cell tryptase, blocking degranulation before histamine is released. It also inhibits COX-1, COX-2, and prostaglandin D2 synthase simultaneously, cutting both the histamine and prostaglandin arms of the inflammatory response — supporting both seasonal allergy symptoms and systemic low-grade inflammation.", tissue:"Nettle's silica, calcium, and iron support the micronutrient environment needed for collagen synthesis and cellular repair. The anti-inflammatory flavonoids work additively, reducing background inflammation that otherwise slows tissue nourishment and recovery." } },
+      why:{ minerals:"Nettle leaves are iron-rich and contain vitamin C, which reduces dietary iron from Fe3+ to the Fe2+ form absorbed by DMT1 transporters in the duodenum, making nettle iron more bioavailable than many plant sources.", inflammation:"Nettle leaf extract acts as an H1 histamine receptor antagonist and inhibits mast cell tryptase, blocking degranulation before histamine is released. It also inhibits COX-1, COX-2, and prostaglandin D2 synthase simultaneously.", tissue:"Nettle's silica, calcium, and iron support the micronutrient environment needed for collagen synthesis and cellular repair." } },
 
     { id:'horsetail', category:'Forest Tea', name:'Horsetail', latin:'Equisetum arvense',
       ingredients:'silica-rich horsetail',
       desc:'An ancient silica-rich plant, traditionally used to rebuild connective tissue, support joint and knee recovery, heal skin wounds, and strengthen bone.',
       tags:{tissue:3, minerals:2, inflammation:1}, benefits:['joint & knee recovery','connective tissue & cartilage repair','skin wound & scrape healing','structural injury recovery','bone & tendon rebuilding','hair & nail strengthening'],
-      why:{ tissue:"Horsetail is the plant kingdom\'s richest source of orthosilicic acid — the water-soluble, bioavailable form of silicon. Orthosilicic acid is a required cofactor for prolyl hydroxylase, the enzyme that hydroxylates proline and lysine residues in procollagen to form collagen\'s triple-helix structure. Without adequate silicon, collagen cross-linking is impaired. Research (PMC10141616) confirms horsetail extract directly increases fibroblast collagen synthesis and upregulates IL-10, accelerating structural repair in injured tissue.", minerals:"Horsetail\'s silica content — up to 25% of dry weight — is orders of magnitude higher than other plants, and crucially it\'s in water-soluble monosilicic acid form that crosses the gut epithelium, enters circulation, and is delivered to active repair sites in cartilage, bone, skin, and connective tissue where it stimulates structural protein production.", inflammation:"Horsetail\'s flavonoids — isoquercitrin, kaempferol, and quercetin — inhibit NF-κB, COX-2, and inflammatory cytokine production at injury sites. This anti-inflammatory action works alongside the silica\'s pro-regenerative effect — reducing the destructive phase of inflammation while simultaneously supporting structural rebuilding." } },
+      why:{ tissue:"Horsetail is the plant kingdom's richest source of orthosilicic acid — the water-soluble, bioavailable form of silicon. Orthosilicic acid is a required cofactor for prolyl hydroxylase, the enzyme that hydroxylates proline and lysine residues in procollagen to form collagen's triple-helix structure.", minerals:"Horsetail's silica content — up to 25% of dry weight — is in water-soluble monosilicic acid form that crosses the gut epithelium and is delivered to active repair sites in cartilage, bone, skin, and connective tissue.", inflammation:"Horsetail's flavonoids — isoquercitrin, kaempferol, and quercetin — inhibit NF-κB, COX-2, and inflammatory cytokine production at injury sites." } },
 
     { id:'elderberry', category:'Forest Tea', name:'Elderberry', latin:'Sambucus nigra ssp. caerulea',
       ingredients:'blue elderberry infusion',
       desc:'A deep berry infusion, supports immune defense, respiratory wellness, and antioxidant intake.',
       tags:{immune:3, respiratory:2}, benefits:['immune season defense','cold & flu prevention','antioxidant-rich berry','respiratory illness support','getting sick support'],
-      why:{ immune:"Elderberry anthocyanins — primarily cyanidin-3-glucoside and cyanidin-3-sambubioside — bind directly to influenza hemagglutinin and neuraminidase glycoproteins, physically blocking the sites viruses use to attach to and enter host cells, confirmed in plaque reduction assays. Quercetin and rutin further inhibit viral replication by blocking the viral Nsp13 helicase. In parallel, elderberry activates macrophage NF-κB signaling, amplifying TNF-α, IL-1, and IL-6 cytokine production to mount a faster innate immune response.", respiratory:"Beyond the antiviral action, elderberry's flavonoids inhibit mast cell degranulation and reduce airway inflammation, supporting recovery from respiratory illness. The anti-neuraminidase effect is particularly relevant to influenza-associated breathing symptoms, as neuraminidase allows replicated virus to exit host cells and spread deeper into the airway." } },
+      why:{ immune:"Elderberry anthocyanins — primarily cyanidin-3-glucoside and cyanidin-3-sambubioside — bind directly to influenza hemagglutinin and neuraminidase glycoproteins, physically blocking the sites viruses use to attach to and enter host cells. Quercetin and rutin further inhibit viral replication.", respiratory:"Beyond the antiviral action, elderberry's flavonoids inhibit mast cell degranulation and reduce airway inflammation, supporting recovery from respiratory illness." } },
 
     { id:'skullcap', category:'Forest Tea', name:'Skullcap', latin:'Scutellaria californica',
       ingredients:'California skullcap',
       desc:'A gentle nervine herb, traditionally used for anxiety, panic, nervous tension, and restful sleep.',
       tags:{calm:3, sleep:3}, benefits:['anxiety & panic calming','restful deep sleep','overactive mind quieting','nervous tension & stress relief','pre-sleep wind-down'],
-      why:{ calm:"Baicalin, baicalein, and wogonin — skullcap\'s three primary flavonoids — bind the benzodiazepine allosteric site on GABA-A receptors, increasing chloride conductance and reducing neuronal excitability. Baicalin preferentially modulates α2/α3 subunit-containing receptors, the isoforms associated with anxiolysis rather than sedation. Aqueous skullcap extracts also inhibit GABA reuptake transporters (GAT1), raising synaptic GABA concentrations. The combined effect is gentle quieting of anxious arousal — the same receptor mechanism as benzodiazepines, but at much lower affinity and with no dependence liability.", sleep:"The GABA-A modulation that reduces anxiety also lowers the threshold for sleep onset. Skullcap\'s antispasmodic action on smooth muscle further releases the physical tension that keeps the nervous system alert. Its effect is on sleep initiation quality — quieting background noise — rather than a sedative knockout." } },
+      why:{ calm:"Baicalin, baicalein, and wogonin — skullcap's three primary flavonoids — bind the benzodiazepine allosteric site on GABA-A receptors, increasing chloride conductance and reducing neuronal excitability. The combined effect is gentle quieting of anxious arousal.", sleep:"The GABA-A modulation that reduces anxiety also lowers the threshold for sleep onset. Skullcap's antispasmodic action releases the physical tension that keeps the nervous system alert." } },
 
     { id:'yarrow', category:'Forest Tea', name:'Yarrow', latin:'Achillea millefolium',
       ingredients:'wild yarrow flower',
       desc:'A bright wildflower herb, traditionally used for menstrual comfort, pelvic circulation, and female reproductive support.',
       tags:{menstrual:3, inflammation:2, circulation:2}, benefits:['menstrual cramp & flow regulation','pelvic warmth & circulatory support','female reproductive tonic','period pain relief','menstrual cycle regulation'],
-      why:{ menstrual:"Yarrow's sesquiterpene lactone achillin inhibits NF-κB signaling, directly reducing prostaglandin E2 and thromboxane B2, the compounds that drive uterine smooth muscle into hypercontractility during menstruation. Luteolin and apigenin act additively as calcium channel antagonists, relaxing the uterus further. The combined antispasmodic and anti-prostaglandin action addresses the two primary mechanisms of menstrual cramping.", inflammation:"Chamazulene (formed during processing) provides COX-2 inhibition, while achillin's NF-κB suppression cuts prostaglandin and leukotriene production. Yarrow's anti-inflammatory action is most pronounced in smooth muscle and pelvic vascular tissue, targeted to the context where it's traditionally used rather than a broad systemic effect.", circulation:"Yarrow's flavonoids have mild alpha-adrenergic receptor activity that modulates vascular tone in the pelvic region, while chamazulene and related terpenoids act as mild vasodilators. The combined effect supports better blood flow regulation through the pelvis, warming the extremities and reducing the cold hands and feet that often accompany cramping." } },
+      why:{ menstrual:"Yarrow's sesquiterpene lactone achillin inhibits NF-κB signaling, directly reducing prostaglandin E2 and thromboxane B2 — the compounds that drive uterine smooth muscle into hypercontractility during menstruation. Luteolin and apigenin act additively as calcium channel antagonists.", inflammation:"Chamazulene provides COX-2 inhibition, while achillin's NF-κB suppression cuts prostaglandin and leukotriene production. Yarrow's anti-inflammatory action is most pronounced in smooth muscle and pelvic vascular tissue.", circulation:"Yarrow's flavonoids have mild alpha-adrenergic receptor activity that modulates vascular tone in the pelvic region, while chamazulene and related terpenoids act as mild vasodilators." } },
 
     { id:'laurel-spritz', category:'Sparkling Botanical', name:'Laurel Spritz', latin:'Umbellularia californica',
       ingredients:'bay laurel hydrosol · sparkling water · woodland citrus lift',
@@ -322,8 +519,89 @@ class Component extends DCLogic {
       ingredients:'light floral sparkling water · softly honeyed',
       desc:"A light, softly-honeyed floral sparkling water, elderflower, the bright cousin of elderberry's seasonal support.",
       tags:{immune:1, respiratory:1, mood:1}, benefits:['light & floral','softly honeyed'],
-      why:{ immune:'Elderflower is the bright, floral cousin of elderberry, a softly-honeyed nod to seasonal support.', respiratory:'Elderflower has a long folk history through the sniffly seasons, here in a light sparkling form.' } }
+      why:{ immune:'Elderflower is the bright, floral cousin of elderberry, a softly-honeyed nod to seasonal support.', respiratory:'Elderflower has a long folk history through the sniffly seasons, here in a light sparkling form.' } },
+
+    { id:'nettle-soup', category:'From the Kitchen', name:'Nettle Soup', latin:'Urtica dioica',
+      ingredients:'foraged nettle · cashew cream · onion · garlic · olive oil · vegetable broth · lemon',
+      allergens:'Tree nuts (cashew)',
+      desc:'A nourishing, mineral-rich green soup of fresh-foraged nettle blended silky with cashew cream, iron, calcium, and silica in a warm bowl.',
+      tags:{minerals:3, tissue:2, inflammation:1}, benefits:['iron & mineral nourishment','hair, skin & nails','deep vitality'],
+      why:{ minerals:"Nettle is one of the most mineral-dense greens there is, rich in iron, calcium, and silica, traditionally used as a deeply nourishing tonic. Simmered into soup, it's a restorative, food-as-medicine way to replenish.", tissue:"Nettle's silica and minerals traditionally support strong hair, skin, and nails, here in a warming, nourishing bowl." } }
   ];
+
+  HERBS = [
+    { id:'rhodiola', name:'Rhodiola', latin:'Rhodiola rosea', stock:true, tags:{calm:3,energy:2,focus:2,mood:1}, prep:'Loose tea or bulk — taken in the morning.', why:'A high-altitude adaptogen rich in rosavins and salidroside, traditionally used to build resilience to stress and fatigue and steady energy and mood under pressure.' },
+    { id:'tulsi', name:'Tulsi (Holy Basil)', latin:'Ocimum sanctum', stock:true, tags:{calm:3,mood:2,immune:1,respiratory:1,focus:1}, prep:'Loose tea or bulk — gentle enough for daily use.', why:'Revered in Ayurveda as a sacred adaptogen; its eugenol and ursolic acid are traditionally associated with calming the nerves, lifting mood, and steadying the body through stress.' },
+    { id:'bacopa', name:'Bacopa (Brahmi)', latin:'Bacopa monnieri', stock:true, tags:{focus:3,calm:1}, prep:'Bulk — taken daily; effects build over weeks.', why:'An Ayurvedic brain tonic whose bacosides are traditionally used to support memory, learning, and mental clarity over time.' },
+    { id:'passionflower', name:'Passionflower', latin:'Passiflora incarnata', stock:true, tags:{sleep:3,calm:2,mood:1}, prep:'Loose tea or bulk — an hour before bed.', why:'A gentle nervine whose flavonoids (chrysin, vitexin) are traditionally used to quiet a racing mind and invite restful sleep without heaviness.' },
+    { id:'lemon-balm', name:'Lemon Balm', latin:'Melissa officinalis', stock:true, tags:{calm:2,sleep:2,mood:2,digestion:1,focus:1}, prep:'Loose tea or bulk — lovely any time of day.', why:'A lemony mint traditionally used to lift the spirits, calm nervous tension, settle digestion, and gently support sleep.' },
+    { id:'st-johns-wort', name:'St. John\'s Wort', latin:'Hypericum perforatum', stock:true, tags:{mood:3,sleep:1}, prep:'Bulk or tincture — taken consistently over weeks.', why:'Bright flowers rich in hypericin and hyperforin, traditionally used to lift low mood. Note: interacts with many medications — check with a practitioner first.' },
+    { id:'rose', name:'Rose', latin:'Rosa spp.', stock:true, tags:{mood:3,tissue:1}, prep:'Loose tea or bulk — buds, alone or blended.', why:'Fragrant buds traditionally used to soothe grief, soften the heart, cool irritation, and bring gentle uplift.' },
+    { id:'reishi', name:'Reishi', latin:'Ganoderma lucidum', stock:true, tags:{immune:3,calm:2,sleep:1}, prep:'Bulk — a long, slow decoction.', why:'The "mushroom of immortality," whose beta-glucans and triterpenes are traditionally used to support immune resilience, calm the spirit, and build deep vitality.' },
+    { id:'yaupon', name:'Yaupon', latin:'Ilex vomitoria', stock:true, tags:{energy:3,focus:2}, prep:'Loose tea or bulk.', why:'North America\'s only native caffeinated plant, rich in caffeine and theobromine, traditionally brewed for clean, sustained energy.' },
+    { id:'kola-nut', name:'Kola Nut', latin:'Cola acuminata', stock:true, tags:{energy:3,focus:2}, prep:'Bulk — used in small amounts.', why:'A caffeine-rich West African nut traditionally used for stamina, alertness, and endurance.' },
+    { id:'tribulus', name:'Tribulus', latin:'Tribulus terrestris', stock:true, tags:{energy:2,menstrual:2}, prep:'Bulk — a daily course.', why:'Used in Ayurvedic and Chinese systems as a tonic for vitality, libido, and reproductive and urinary health.' },
+    { id:'fennel', name:'Fennel Seed', latin:'Foeniculum vulgare', stock:true, tags:{digestion:3}, prep:'Bulk — seeds chewed or steeped after meals.', why:'Sweet aromatic seeds whose anethole is traditionally used to ease bloating, gas, and cramping after eating.' },
+    { id:'cumin', name:'Cumin Seed', latin:'Cuminum cyminum', stock:true, tags:{digestion:2}, prep:'Bulk — a warming tea or culinary spice.', why:'A warming digestive seed traditionally used to kindle the appetite and ease gas.' },
+    { id:'ceylon-cinnamon', name:'Ceylon Cinnamon', latin:'Cinnamomum verum', stock:true, tags:{digestion:2,circulation:2,immune:1}, prep:'Loose tea or bulk.', why:'True cinnamon, softer than cassia, traditionally used as a warming aromatic for digestion, circulation, and balanced energy.' },
+    { id:'galangal', name:'Galangal Root', latin:'Alpinia officinarum', stock:true, tags:{digestion:2,circulation:1,immune:1}, prep:'Bulk — a warming tea or grated fresh.', why:'A warming rhizome, cousin to ginger, traditionally used to stimulate digestion and ease nausea.' },
+    { id:'slippery-elm', name:'Slippery Elm Bark', latin:'Ulmus rubra', stock:true, tags:{digestion:3,respiratory:1}, prep:'Bulk — stirred into warm water as a gruel.', why:'Rich, soothing mucilage traditionally used to coat and calm the digestive tract and throat.' },
+    { id:'marshmallow', name:'Marshmallow Root', latin:'Althaea officinalis', stock:true, tags:{respiratory:2,digestion:2,urinary:2,tissue:1}, prep:'Bulk — best as a cold infusion.', why:'Abundant in mucilage, traditionally used to coat and calm irritated tissue along the throat, gut, and urinary tract.' },
+    { id:'licorice', name:'Licorice Root', latin:'Glycyrrhiza glabra', stock:true, tags:{digestion:2,respiratory:2,menstrual:1,immune:1}, prep:'Loose tea or bulk — in small amounts.', why:'A sweet, harmonizing root traditionally used to soothe the gut and lungs and support adrenal stamina. Use modestly — can raise blood pressure.' },
+    { id:'papaya-leaf', name:'Papaya Leaf', latin:'Carica papaya', stock:true, tags:{digestion:2,immune:2}, prep:'Loose tea or bulk.', why:'Rich in papain enzymes, traditionally used to support digestion and bolster immune and platelet resilience.' },
+    { id:'cascara', name:'Cascara Sagrada', latin:'Rhamnus purshiana', stock:true, tags:{bowel:3}, prep:'Bulk — low doses, short term only.', why:'A bowel-moving bark whose anthraquinones gently stimulate intestinal rhythm. Short-term, occasional use only.' },
+    { id:'milk-thistle', name:'Milk Thistle Seed', latin:'Silybum marianum', stock:true, tags:{liver:3}, prep:'Bulk — ground seed or tincture.', why:'Its silymarin is traditionally used to protect and regenerate the liver.' },
+    { id:'dandelion', name:'Dandelion Root', latin:'Taraxacum officinale', stock:true, tags:{liver:3,digestion:2,urinary:1}, prep:'Loose tea or bulk — roasted root.', why:'A premier bitter tonic — root for the liver, leaf for the kidneys — traditionally used to support detoxification and digestion.' },
+    { id:'chicory', name:'Chicory Root', latin:'Cichorium intybus', stock:true, tags:{liver:2,digestion:2,bowel:1}, prep:'Loose tea or bulk — roasted, coffee-like.', why:'A bitter root rich in inulin, traditionally used to stimulate bile, support the liver, and feed gut flora.' },
+    { id:'barberry', name:'Barberry Root Bark', latin:'Berberis vulgaris', stock:true, tags:{liver:2,digestion:2,immune:1}, prep:'Bulk — a bitter decoction before meals.', why:'Rich in berberine, traditionally used as a bitter tonic to stimulate bile and tone digestion.' },
+    { id:'mullein', name:'Mullein Leaf', latin:'Verbascum thapsus', stock:true, tags:{respiratory:3}, prep:'Loose tea or bulk — strained well.', why:'Soft, mucilaginous leaves traditionally used to soothe the lungs and ease dry coughs.' },
+    { id:'elecampane', name:'Elecampane Root', latin:'Inula helenium', stock:true, tags:{respiratory:3}, prep:'Bulk — a simmered decoction.', why:'A classic lung root traditionally used to clear damp, stuck congestion and support a productive cough.' },
+    { id:'thyme', name:'Thyme Leaf', latin:'Thymus vulgaris', stock:true, tags:{respiratory:3,immune:1}, prep:'Loose tea or bulk — tea or steam.', why:'Aromatic and rich in thymol, traditionally used to open the airways and ease coughs.' },
+    { id:'osha', name:'Osha Root', latin:'Ligusticum porteri', stock:true, tags:{respiratory:3,immune:1}, prep:'Bulk or tincture — at the first sign of illness.', why:'A revered mountain root traditionally used to warm the lungs and support the breath. Choose ethically wildcrafted sources.' },
+    { id:'lobelia', name:'Lobelia', latin:'Lobelia inflata', stock:true, tags:{respiratory:3}, prep:'Tincture — very small doses, with guidance.', why:'A powerful respiratory relaxant traditionally used in tiny amounts to ease bronchial spasm. Dose-sensitive; best used under guidance.' },
+    { id:'plantain', name:'Plantain Leaf', latin:'Plantago major', stock:true, tags:{respiratory:2,tissue:2,digestion:1}, prep:'Loose tea or bulk — tea or poultice.', why:'A soothing wayside herb traditionally used to calm irritated tissue in the lungs, on the skin, and through the gut.' },
+    { id:'oregano', name:'Oregano', latin:'Origanum vulgare', stock:true, tags:{immune:2,respiratory:1,digestion:1}, prep:'Loose tea or bulk.', why:'Potent in carvacrol and thymol, traditionally used as an aromatic immune and digestive support.' },
+    { id:'pau-darco', name:'Pau d\'Arco', latin:'Tabebuia impetiginosa', stock:true, tags:{immune:3,inflammation:1}, prep:'Bulk — a simmered decoction.', why:'Inner bark rich in lapachol, traditionally brewed as a cleansing tonic for immune support.' },
+    { id:'amla', name:'Amla Berry', latin:'Phyllanthus emblica', stock:true, tags:{immune:2,tissue:2,minerals:2,digestion:1}, prep:'Bulk — powder or tea.', why:'One of the most vitamin-C-dense fruits; a rasayana traditionally used as a rejuvenating tonic for immunity, skin, hair, and digestion.' },
+    { id:'uva-ursi', name:'Uva Ursi Leaf', latin:'Arctostaphylos uva-ursi', stock:true, tags:{urinary:3}, prep:'Loose tea or bulk — short term.', why:'Bearberry leaf rich in arbutin, traditionally used as a focused urinary antiseptic.' },
+    { id:'juniper', name:'Juniper Berry', latin:'Juniperus communis', stock:true, tags:{urinary:3,digestion:1,circulation:1}, prep:'Bulk — short term.', why:'Aromatic berries traditionally used as a warming urinary tonic and digestive stimulant.' },
+    { id:'horsetail-herb', name:'Horsetail (Shavegrass)', latin:'Equisetum arvense', stock:true, tags:{tissue:3,minerals:2,urinary:2,inflammation:1}, prep:'Loose tea or bulk — long-steeped.', why:'The richest plant source of bioavailable silica, traditionally used to strengthen hair, skin, nails, and connective tissue.' },
+    { id:'chaste-berry', name:'Chaste Berry (Vitex)', latin:'Vitex agnus-castus', stock:true, tags:{menstrual:3,mood:1}, prep:'Bulk — each morning; builds over cycles.', why:'Traditionally used to support a regular, balanced cycle and ease premenstrual tension.' },
+    { id:'black-cohosh', name:'Black Cohosh Root', latin:'Actaea racemosa', stock:true, tags:{menstrual:3}, prep:'Tincture or bulk — a daily course.', why:'Traditionally used to ease menopausal transitions and support the female reproductive system.' },
+    { id:'dong-quai', name:'Dong Quai Root', latin:'Angelica sinensis', stock:true, tags:{menstrual:3,circulation:2}, prep:'Bulk — a decoction, often blended.', why:'The "female ginseng" of Chinese medicine, traditionally used as a blood-building tonic for the cycle and pelvic circulation.' },
+    { id:'wild-yam', name:'Wild Yam Root', latin:'Dioscorea villosa', stock:true, tags:{menstrual:2,digestion:2,inflammation:1}, prep:'Bulk or tincture.', why:'Traditionally used as an antispasmodic for menstrual and digestive cramping.' },
+    { id:'red-clover', name:'Red Clover', latin:'Trifolium pratense', stock:true, tags:{menstrual:2,tissue:1,minerals:1,respiratory:1}, prep:'Loose tea or bulk — a nourishing infusion.', why:'Rich in isoflavones, traditionally used as a gentle tonic for hormonal balance, skin, and vitality.' },
+    { id:'yarrow-bulk', name:'Yarrow Flower', latin:'Achillea millefolium', stock:true, tags:{menstrual:2,circulation:2,immune:1,inflammation:1}, prep:'Loose tea or bulk.', why:'A bitter aromatic flower traditionally used to regulate menstrual flow, tone circulation, and support the body through fevers.' },
+    { id:'nettle-bulk', name:'Nettle Leaf', latin:'Urtica dioica', stock:true, tags:{minerals:3,tissue:2,inflammation:2,urinary:1}, prep:'Loose tea or bulk — a long-steeped infusion.', why:'A deeply mineral-rich green traditionally used as a nourishing tonic for vitality, seasonal histamine balance, and healthy hair and skin.' },
+    { id:'chickweed', name:'Chickweed', latin:'Stellaria media', stock:true, tags:{tissue:3,minerals:1}, prep:'Bulk — tea or salve.', why:'A cooling, mineral-rich herb traditionally used inside and out to soothe hot, irritated skin.' },
+    { id:'comfrey', name:'Comfrey', latin:'Symphytum officinale', stock:true, tags:{tissue:3,inflammation:2}, prep:'External only — poultice or salve.', why:'"Knitbone," traditionally used externally to support healing of skin, sprains, and connective tissue. External use only.' },
+    { id:'rosehip', name:'Rosehip', latin:'Rosa canina', stock:true, tags:{tissue:3,immune:1,inflammation:1}, prep:'Loose tea or bulk; seed oil topically.', why:'Rich in vitamin C and skin-loving fatty acids, traditionally used to nourish skin and support immunity.' },
+    { id:'stevia', name:'Stevia Leaf', latin:'Stevia rebaudiana', stock:true, tags:{}, prep:'Bulk — a pinch to sweeten any blend.', why:'A naturally sweet leaf used as a sugar-free sweetener that doesn\'t spike blood sugar.' },
+    { id:'ashwagandha', name:'Ashwagandha', latin:'Withania somnifera', stock:false, tags:{calm:3,energy:1,sleep:1}, prep:'We can advise or source on request.', why:'An Ayurvedic adaptogen traditionally used to build resilience to stress and support steady energy and sleep.' },
+    { id:'valerian', name:'Valerian', latin:'Valeriana officinalis', stock:false, tags:{sleep:3,calm:1}, prep:'We can advise or source on request.', why:'A classic sedative root traditionally used for deep sleep and easing nervous tension.' },
+    { id:'chamomile', name:'Chamomile', latin:'Matricaria chamomilla', stock:false, tags:{sleep:2,calm:2,digestion:2}, prep:'We can advise or source on request.', why:'A gentle daisy traditionally used to calm the nerves, settle digestion, and ease into sleep.' },
+    { id:'ginger', name:'Ginger', latin:'Zingiber officinale', stock:false, tags:{digestion:3,circulation:1,immune:1}, prep:'We can advise or source on request.', why:'A warming rhizome traditionally used to ease nausea, kindle digestion, and warm the circulation.' },
+    { id:'peppermint', name:'Peppermint', latin:'Mentha piperita', stock:false, tags:{digestion:3}, prep:'We can advise or source on request.', why:'Cooling and aromatic, traditionally used to relieve bloating, gas, and digestive cramping.' },
+    { id:'turmeric', name:'Turmeric', latin:'Curcuma longa', stock:false, tags:{inflammation:3,liver:1}, prep:'We can advise or source on request.', why:'Rich in curcumin, traditionally used to cool inflammation and support the liver and joints.' },
+    { id:'echinacea', name:'Echinacea', latin:'Echinacea purpurea', stock:false, tags:{immune:3}, prep:'We can advise or source on request.', why:'The classic immune herb, traditionally used at the first sign of a cold to rally the body\'s defenses.' },
+    { id:'ginkgo', name:'Ginkgo', latin:'Ginkgo biloba', stock:false, tags:{focus:3,circulation:2}, prep:'We can advise or source on request.', why:'Traditionally used to support memory, mental sharpness, and circulation to the brain.' },
+    { id:'ginseng', name:'Ginseng', latin:'Panax ginseng', stock:false, tags:{energy:3,focus:1}, prep:'We can advise or source on request.', why:'A prized tonic root traditionally used for deep energy, stamina, and vitality.' },
+    { id:'hawthorn', name:'Hawthorn', latin:'Crataegus spp.', stock:false, tags:{circulation:3,mood:1}, prep:'We can advise or source on request.', why:'A heart tonic traditionally used to support healthy circulation and the emotional heart.' },
+    { id:'raspberry-leaf', name:'Raspberry Leaf', latin:'Rubus idaeus', stock:false, tags:{menstrual:3,minerals:1}, prep:'We can advise or source on request.', why:'The classic women\'s tonic, traditionally used to tone the uterus and support the cycle.' },
+    { id:'calendula', name:'Calendula', latin:'Calendula officinalis', stock:false, tags:{tissue:3,inflammation:1}, prep:'We can advise or source on request.', why:'Golden petals traditionally used to soothe and heal the skin and calm inflammation.' },
+    { id:'oatstraw', name:'Oatstraw', latin:'Avena sativa', stock:false, tags:{minerals:3,calm:2}, prep:'We can advise or source on request.', why:'A deeply nourishing tonic traditionally used to rebuild frayed nerves and replenish minerals.' }
+  ];
+
+  herbById(id){ return this.HERBS.find(h => h.id === id); }
+
+  expandedRank(active){
+    if (!active || !active.length) return [];
+    return this.HERBS
+      .map((h, i) => ({ id:h.id, s:this.score(h, active), i }))
+      .filter(x => x.s > 0)
+      .sort((a, b) => (b.s - a.s) || (a.i - b.i))
+      .map(x => x.id);
+  }
 
   byId(id){ return this.DRINKS.find(d => d.id === id); }
 
@@ -366,8 +644,16 @@ class Component extends DCLogic {
     return d.name + ' is traditionally enjoyed to support ' + (this.LABELS[active[0]] || 'how you feel').toLowerCase() + '.';
   }
 
+  whyForResult(d, result){
+    if (result.source === 'ai'){
+      if (d.id === result.aiPrimaryId && result.aiWhy) return result.aiWhy;
+      if (d.why){ const k = Object.keys(d.why)[0]; if (k) return d.why[k]; }
+      return d.name + ' is one of our California-native botanicals.';
+    }
+    return this.whyFor(d, result.active || []);
+  }
+
   onQuery = (e) => this.setState({ query: e.target.value, showNudge: false });
-  onKey = (e) => { if (e.key === 'Enter') this.consult(); };
 
   toggle = (id) => this.setState(s => ({
     selected: s.selected.includes(id) ? s.selected.filter(x => x !== id) : [...s.selected, id],
@@ -376,19 +662,19 @@ class Component extends DCLogic {
 
   consult = () => {
     const q = (this.state.query || '').trim();
-    if (q) { this.aiConsult(q); return; }
+    if (q){ this.aiConsult(q); return; }
     this.localConsult();
   };
 
   localConsult = () => {
     const typed = this.parse(this.state.query);
     const active = [...new Set([...this.state.selected, ...typed])];
-    if (!active.length){ this.setState({ phase:'intake', showNudge: true }); return; }
+    if (!active.length){ this.setState({ phase:'intake', showNudge:true }); return; }
     const pool = this.rank(active);
-    if (!pool.length){ this.setState({ phase:'intake', showNudge: true }); return; }
-    this.setState({ phase:'result', showNudge:false, result:{
-      source:'local', pool, primaryId: pool[0], active,
-      labelText: active.map(id => this.LABELS[id].toLowerCase()).join(' · ')
+    if (!pool.length){ this.setState({ phase:'intake', showNudge:true }); return; }
+    this.setState({ phase:'result', showNudge:false, savedFlag:false, result:{
+      source:'local', pool, primaryId:pool[0], active,
+      labelText: active.map(id => this.LABELS[id] ? this.LABELS[id].toLowerCase() : id).join(' · ')
     } });
   };
 
@@ -427,17 +713,17 @@ class Component extends DCLogic {
     this.setState({ phase:'loading', showNudge:false });
     try {
       let raw;
-      if (window.claude && typeof window.claude.complete === 'function') {
+      if (window.claude && typeof window.claude.complete === 'function'){
         raw = await Promise.race([
           window.claude.complete(this.buildPrompt(q)),
           new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
         ]);
       } else {
         const res = await Promise.race([
-          fetch('/.netlify/functions/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: this.buildPrompt(q), query: q })
+          fetch('/.netlify/functions/wellness-chat', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body:JSON.stringify({ prompt: this.buildPrompt(q), query: q })
           }),
           new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000))
         ]);
@@ -447,11 +733,12 @@ class Component extends DCLogic {
       }
       const d = this.parseAI(raw);
       const pool = [d.primaryId, ...d.alts].filter((v, i, a) => a.indexOf(v) === i);
-      this.setState({ phase:'result', showNudge:false, result:{
+      this.setState({ phase:'result', showNudge:false, savedFlag:false, result:{
         source:'ai', pool, primaryId:d.primaryId, aiPrimaryId:d.primaryId,
-        aiWhy:d.why, labelText:d.intent || 'how you feel'
+        aiWhy:d.why, labelText:d.intent || 'how you feel',
+        active:[...new Set([...this.state.selected, ...this.parse(q)])]
       } });
-    } catch (e) {
+    } catch(e){
       this.localConsult();
     }
   };
@@ -459,68 +746,228 @@ class Component extends DCLogic {
   surprise = () => {
     const pick = this.CHIP_ORDER[Math.floor(Math.random() * this.CHIP_ORDER.length)];
     const pool = this.rank([pick]);
-    this.setState({ phase:'result', showNudge:false, result:{
-      source:'local', pool, primaryId: pool[0], active:[pick],
+    if (!pool.length){ this.setState({ phase:'result', showNudge:false, savedFlag:false, result:{ source:'local', pool:[], primaryId:this.DRINKS[0].id, active:[pick], labelText:this.LABELS[pick].toLowerCase() } }); return; }
+    this.setState({ phase:'result', showNudge:false, savedFlag:false, result:{
+      source:'local', pool, primaryId:pool[0], active:[pick],
       labelText: this.LABELS[pick].toLowerCase()
     } });
   };
 
-  promote = (id) => this.setState(s => ({ result: { ...s.result, primaryId: id } }));
-  reset = () => this.setState({ phase:'intake', showNudge:false });
-  viewMenu = () => this.setState({ phase:'menu' });
+  promote = (id) => this.setState(s => ({ result: { ...s.result, primaryId:id } }));
 
-  whyForResult = (d, result) => {
-    if (result.source === 'ai') {
-      if (d.id === result.aiPrimaryId && result.aiWhy) return result.aiWhy;
-      if (d.why) { const k = Object.keys(d.why)[0]; if (k) return d.why[k]; }
-      return d.name + ' is one of our California-native botanicals.';
+  reset = () => this.setState({ view:'apothecary', phase:'intake', showNudge:false });
+  goApothecary = () => this.setState({ view:'apothecary' });
+  viewMenu = () => this.setState({ view:'menu' });
+  goJournal = () => { this.setState({ view:'journal' }); this.maybeLoadRecords(); };
+  toggleDrawer = () => this.setState(s => ({ drawerOpen: !s.drawerOpen }));
+  closeDrawer = () => this.setState({ drawerOpen:false });
+  navApothecary = () => this.setState({ view:'apothecary', drawerOpen:false });
+  navMenu = () => this.setState({ view:'menu', drawerOpen:false });
+  navJournal = () => { this.setState({ view:'journal', drawerOpen:false }); this.maybeLoadRecords(); };
+
+  // ---- backend helper ----
+  api(path, opts) {
+    return fetch('/.netlify/functions/' + path, opts).then(async (r) => {
+      const text = await r.text();
+      let body = {};
+      try { body = text ? JSON.parse(text) : {}; } catch (e) { body = { error: 'Unexpected server response.' }; }
+      return { ok: r.ok, status: r.status, body };
+    });
+  }
+
+  // ---- auth ----
+  onAuthEmail = (e) => this.setState({ authEmail: e.target.value, authError:'' });
+  onAuthPassword = (e) => this.setState({ authPassword: e.target.value, authError:'' });
+  authToggle = () => this.setState(s => ({ authMode: s.authMode === 'signin' ? 'signup' : 'signin', authError:'', authMsg:'' }));
+
+  authSubmit = async () => {
+    const email = (this.state.authEmail || '').trim();
+    const password = this.state.authPassword || '';
+    if (!email || !password) { this.setState({ authError:'Enter your email and password.' }); return; }
+    if (password.length < 6) { this.setState({ authError:'Password must be at least 6 characters.' }); return; }
+    const action = this.state.authMode === 'signup' ? 'signup' : 'signin';
+    this.setState({ authBusy:true, authError:'', authMsg:'' });
+    try {
+      const res = await this.api('auth', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action, email, password }) });
+      if (!res.ok || res.body.error) { this.setState({ authBusy:false, authError: res.body.error || 'Something went wrong. Please try again.' }); return; }
+      const token = res.body.access_token;
+      if (!token) { this.setState({ authBusy:false, authMode:'signin', authPassword:'', authMsg: res.body.message || 'Check your email to confirm your account, then sign in.' }); return; }
+      try { window.localStorage.setItem('lrl_token', token); window.localStorage.setItem('lrl_email', email); } catch (e) {}
+      this.setState({ token, account:{ email }, authBusy:false, authEmail:'', authPassword:'', authError:'', authMsg:'', recordsLoaded:false });
+      this.loadRecords();
+    } catch (e) {
+      this.setState({ authBusy:false, authError:'Could not reach the server. Accounts work on the live site.' });
     }
-    return this.whyFor(d, result.active || []);
+  };
+
+  signOut = () => {
+    try { window.localStorage.removeItem('lrl_token'); window.localStorage.removeItem('lrl_email'); } catch (e) {}
+    this.setState({ token:null, account:null, records:[], recordsLoaded:false });
+  };
+
+  // ---- journal records ----
+  maybeLoadRecords = () => { if (this.state.token && !this.state.recordsLoaded && !this.state.recordsLoading) this.loadRecords(); };
+  loadRecords = async () => {
+    if (!this.state.token) return;
+    this.setState({ recordsLoading:true });
+    try {
+      const res = await this.api('consultations', { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      if (res.status === 401) { this.signOut(); return; }
+      this.setState({ records: (res.ok && Array.isArray(res.body)) ? res.body : [], recordsLoading:false, recordsLoaded:true });
+    } catch (e) { this.setState({ recordsLoading:false, recordsLoaded:true }); }
+  };
+
+  saveRecord = async () => {
+    const r = this.state.result;
+    if (!r || !this.state.token) return;
+    const d = this.byId(r.primaryId);
+    const herbList = this.expandedRank(r.active || []).slice(0, 3).map(id => { const h = this.herbById(id); return h ? h.name : ''; }).filter(Boolean);
+    const concern = r.labelText || 'how you felt';
+    const herbs = [ d ? ('Café: ' + d.name) : '', herbList.length ? ('Apothecary: ' + herbList.join(', ')) : '' ].filter(Boolean).join(' · ');
+    this.setState({ saveBusy:true, saveError:'' });
+    try {
+      const res = await this.api('consultations', { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + this.state.token }, body: JSON.stringify({ concern, herbs, notes: d ? d.name : null }) });
+      if (res.status === 401) { this.setState({ saveBusy:false, saveError:'Your session expired — please sign in again.' }); return; }
+      if (!res.ok) { this.setState({ saveBusy:false, saveError: res.body.error || 'Could not save.' }); return; }
+      this.setState(s => ({ records: [res.body, ...s.records], savedFlag:true, saveBusy:false }));
+    } catch (e) { this.setState({ saveBusy:false, saveError:'Could not reach the server.' }); }
+  };
+
+  markTried = (id) => async () => {
+    if (!this.state.token || !id) return;
+    this.setState(s => ({ records: s.records.map(x => x.id === id ? { ...x, tried:true } : x) }));
+    try {
+      await this.api('consultations', { method:'PATCH', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + this.state.token }, body: JSON.stringify({ id, tried:true }) });
+    } catch (e) {}
   };
 
   renderVals(){
-    const { phase, query, selected, showNudge, result } = this.state;
+    const { view, phase, query, selected, showNudge, result, account, token, records, savedFlag,
+            authEmail, authPassword, authMode, authError, authMsg, authBusy, recordsLoading, saveBusy, saveError } = this.state;
     const altCount = Math.max(0, Math.min(3, this.props.altCount ?? 2));
     const showWhyProp = this.props.showWhy ?? true;
-    const heroBg = ({ 'Bay Leaf':'#486235', 'Ink':'#1F1C17', 'Canyon Teal':'#395962', 'Laurel Berry':'#BC8057' })[this.props.heroTone] || '#486235';
 
+    const onApothecary = view === 'apothecary';
+    const signedIn = !!token;
+
+    // Neumorphic chip styles
+    const shadowOn = 'inset 4px 4px 9px #ebe1c4, inset -4px -4px 9px #ffffff, 0 0 0 3.2px #fff8e2, 0 0 0 4.4px rgba(116,103,78,.17)';
+    const shadowOff = '5px 5px 11px #ebe1c4, -5px -5px 11px #ffffff, inset 1.5px 1.5px 1px #ffffff, inset -1.5px -1.5px 1px rgba(188,172,146,.35), 0 0 0 1px rgba(255,255,255,.9), 0 0 0 2.2px rgba(116,103,78,.5), 0 0 0 3.2px #fff8e2, 0 0 0 4.4px rgba(116,103,78,.42)';
     const chips = this.CHIP_ORDER.map(id => {
-      const isSel = selected.includes(id);
-      const style = "font-family:'IBM Plex Sans', system-ui, sans-serif; font-size:12.5px; letter-spacing:.02em; padding:9px 14px; border-radius:2px; cursor:pointer; transition:transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease; " +
-        (isSel ? 'background:#486235; border:1px solid #486235; color:#FFFBF5;'
-               : 'background:transparent; border:1px solid rgba(81,45,32,.45); color:#3a342b;');
-      return { id, label:this.LABELS[id], selected:isSel, style, onClick:() => this.toggle(id) };
+      const on = selected.includes(id);
+      return {
+        label: this.LABELS[id],
+        color: on ? '#191514' : '#4d5a47',
+        shadow: on ? shadowOn : shadowOff,
+        toggle: () => this.toggle(id)
+      };
     });
 
-    const isMenuPhase = phase === 'menu';
-    const _tb = "font-family:'IBM Plex Sans', sans-serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; padding:10px 24px; cursor:pointer; outline:none; transition:background .2s ease, color .2s ease; ";
-    const tabApothecaryStyle = _tb + (!isMenuPhase
-      ? 'background:#1F1C17; color:#FFFBF5; border:1px solid #1F1C17; border-radius:2px 0 0 2px;'
-      : 'background:transparent; color:#512D20; border:1px solid rgba(81,45,32,.4); border-right:none; border-radius:2px 0 0 2px;');
-    const tabMenuStyle = _tb + (isMenuPhase
-      ? 'background:#1F1C17; color:#FFFBF5; border:1px solid #1F1C17; border-radius:0 2px 2px 0;'
-      : 'background:transparent; color:#512D20; border:1px solid rgba(81,45,32,.4); border-radius:0 2px 2px 0;');
-    const CATS = ['Signature', 'Forest Tea', 'Sparkling Botanical'];
+    // Neumorphic tab styles
+    const tabBase = "border:none;cursor:pointer;background:#fffbeb;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:box-shadow .25s ease,color .2s ease,transform .12s ease;";
+    const tabActive = tabBase + "border-radius:15px;padding:11px 24px;box-shadow:inset 4px 4px 9px #ebe1c4, inset -4px -4px 9px #ffffff;color:#191514;";
+    const tabInactive = tabBase + "border-radius:15px;padding:11px 24px;box-shadow:5px 5px 11px #ebe1c4, -5px -5px 11px #ffffff, inset 1.5px 1.5px 1px #ffffff, inset -1.5px -1.5px 1px rgba(188,172,146,.35);color:#7c8470;";
+    const tabApothecaryStyle = onApothecary ? tabActive : tabInactive;
+    const tabMenuStyle = view === 'menu' ? tabActive : tabInactive;
+    const tabJournalStyle = view === 'journal' ? tabActive : tabInactive;
+
+    // Menu sections
+    const CATS = ['Signature', 'Forest Tea', 'Sparkling Botanical', 'From the Kitchen'];
     const menuSections = CATS.map(cat => ({
       category: cat,
       drinks: this.DRINKS.filter(d => d.category === cat).map(d => ({
         id:d.id, name:d.name, latin:d.latin||'', hasLatin:!!d.latin,
-        desc:d.desc, ingredients:d.ingredients, benefits:d.benefits
+        desc:d.desc, ingredients:d.ingredients, benefits:d.benefits,
+        allergens:d.allergens||'', hasAllergens:!!d.allergens
       }))
     }));
 
+    // Journal records
+    const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }); } catch (e) { return ''; } };
+    const recordsView = (records || []).map(r => ({
+      id: r.id,
+      date: r.created_at ? fmtDate(r.created_at) : (r.date || ''),
+      concern: r.concern || '',
+      herbsText: r.herbs || '',
+      hasHerbs: !!r.herbs,
+      notes: r.notes || '',
+      hasNotes: !!r.notes,
+      tried: !!r.tried,
+      notTried: !r.tried,
+      onTried: this.markTried(r.id)
+    }));
+
+    // Drawer
+    const drawerTransform = this.state.drawerOpen ? 'translateX(0)' : 'translateX(-100%)';
+    const overlayOpacity = this.state.drawerOpen ? '1' : '0';
+    const overlayVis = this.state.drawerOpen ? 'visible' : 'hidden';
+
     const base = {
-      isIntake: phase === 'intake', isResult: phase === 'result', isLoading: phase === 'loading',
-      isMenu: isMenuPhase,
-      query, chips, showNudge, menuSections, tabApothecaryStyle, tabMenuStyle,
-      onQuery:this.onQuery, onKey:this.onKey, onConsult:this.consult, onSurprise:this.surprise, onReset:this.reset, onViewMenu:this.viewMenu
+      isInput: onApothecary && phase === 'intake',
+      isConsulting: onApothecary && phase === 'loading',
+      isResults: onApothecary && phase === 'result',
+      isMenu: view === 'menu',
+      isJournal: view === 'journal',
+
+      note: query,
+      onNote: this.onQuery,
+      chips, showNudge,
+      onConsult: this.consult,
+      onSurprise: this.surprise,
+
+      tabApothecaryStyle, tabMenuStyle, tabJournalStyle,
+      menuSections,
+
+      signedIn, signedOut: !signedIn,
+      accountEmail: account ? (account.email || '') : '',
+      records: recordsView,
+      hasRecords: recordsView.length > 0,
+      noRecords: recordsView.length === 0 && !recordsLoading,
+      recordsLoading,
+      authEmail, authPassword,
+      authError, hasAuthError: !!authError,
+      authMsg, hasAuthMsg: !!authMsg,
+      authBusy,
+      isSignup: authMode === 'signup',
+      isSignin: authMode === 'signin',
+      authSubmitLabel: authBusy ? 'Please wait…' : (authMode === 'signup' ? 'Create account' : 'Sign in'),
+      authTogglePrompt: authMode === 'signup' ? 'Already have an account?' : 'New here?',
+      authToggleLabel: authMode === 'signup' ? 'Sign in' : 'Create an account',
+      onAuthEmail: this.onAuthEmail,
+      onAuthPassword: this.onAuthPassword,
+      onAuthSubmit: this.authSubmit,
+      onAuthToggle: this.authToggle,
+      onSignOut: this.signOut,
+      saveBusy, saveError, hasSaveError: !!saveError,
+
+      onReset: this.reset,
+      onAgain: this.reset,
+      onGoApothecary: this.goApothecary,
+      onViewMenu: this.viewMenu,
+      onGoJournal: this.goJournal,
+      onSaveRecord: this.saveRecord,
+      savedFlag,
+
+      drawerTransform, overlayOpacity, overlayVis,
+      toggleDrawer: () => this.setState(s => ({ drawerOpen: !s.drawerOpen })),
+      closeDrawer: () => this.setState({ drawerOpen: false }),
+      goDigital: () => this.setState({ drawerOpen:false, view:'apothecary', phase:'intake' }),
+      navApothecary: this.navApothecary,
+      navMenu: this.navMenu,
+      navJournal: this.navJournal,
+
+      // safe defaults for result-only vals
+      primary: { ...this.DRINKS[0], hasLatin:!!this.DRINKS[0].latin, benefits:this.DRINKS[0].benefits, why:'' },
+      alternates: [], hasAlternates: false,
+      matchLabelsText: '', aiSourced: false, showWhyResolved: false,
+      expandLabel: 'how you feel', expandedMatches: [], hasExpanded: false
     };
 
-    if (phase !== 'result' || !result) return base;
+    if (!onApothecary || phase !== 'result' || !result) return base;
 
     const decorate = (d) => ({
       id:d.id, category:d.category, name:d.name,
-      latin:d.latin || '', hasLatin: !!d.latin,
+      latin:d.latin||'', hasLatin:!!d.latin,
       desc:d.desc, ingredients:d.ingredients, benefits:d.benefits,
       why:this.whyForResult(d, result)
     });
@@ -531,17 +978,30 @@ class Component extends DCLogic {
       .slice(0, altCount)
       .map(id => { const d = this.byId(id); return { ...decorate(d), onClick:() => this.promote(d.id) }; });
 
-    const heroPanelStyle = 'background:' + heroBg + '; color:#FFFBF5; border-radius:3px; padding:clamp(24px,4.2vw,42px); position:relative; overflow:hidden; box-shadow:0 18px 44px -24px rgba(31,28,23,.65); margin-top:clamp(20px,3.5vw,30px);';
+    const active = result.active || [];
+    const expandedMatches = this.expandedRank(active).slice(0, 4).map(id => {
+      const h = this.herbById(id);
+      return {
+        name:h.name, latin:h.latin||'', hasLatin:!!h.latin,
+        why:h.why, prep:h.prep, inStock:!!h.stock,
+        stockLabel: h.stock ? 'In stock · loose tea or bulk' : 'Not stocked · we can advise',
+        stockStyle: h.stock
+          ? "font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:.04em;padding:4px 10px;border-radius:8px;color:#486235;background:rgba(72,98,53,.1);border:1px solid rgba(72,98,53,.38);"
+          : "font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:.04em;padding:4px 10px;border-radius:8px;color:#9E6840;background:rgba(188,128,87,.1);border:1px solid rgba(188,128,87,.4);"
+      };
+    });
 
     return { ...base,
       primary, alternates, hasAlternates: alternates.length > 0,
       matchLabelsText: result.labelText || '',
       aiSourced: result.source === 'ai',
       showWhyResolved: showWhyProp && !!primary.why,
-      heroPanelStyle
+      expandLabel: result.labelText || 'how you feel',
+      expandedMatches, hasExpanded: expandedMatches.length > 0
     };
   }
 }
 </script>
+
 </body>
 </html>

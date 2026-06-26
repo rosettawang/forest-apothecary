@@ -79,6 +79,7 @@ exports.handler = async (event) => {
       req.end();
     });
 
+    // Parse and validate the JSON response
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Invalid response format');
     const result = JSON.parse(match[0]);
