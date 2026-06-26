@@ -47,7 +47,7 @@
       </nav>
       <div style="display:flex;align-items:center;gap:22px;justify-self:end">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+        <span onClick="{{ onGoCart }}" title="Your order" style="position:relative;cursor:pointer;display:inline-flex;align-items:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg><sc-if value="{{ hasCartCount }}"><span style="position:absolute;top:-7px;right:-8px;background:#8a9279;color:#fffbeb;font-family:'IBM Plex Sans',sans-serif;font-size:9px;line-height:1;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px">{{ cartCount }}</span></sc-if></span>
       </div>
     </div>
   </div>
@@ -64,7 +64,7 @@
         <img src="assets/laurelate-wordmark.png" alt="Laurelate" style="height:15px;width:auto;display:block">
       </div>
       <div style="justify-self:end;display:flex;cursor:pointer">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+        <span onClick="{{ onGoCart }}" title="Your order" style="position:relative;cursor:pointer;display:inline-flex;align-items:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3c4a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg><sc-if value="{{ hasCartCount }}"><span style="position:absolute;top:-7px;right:-8px;background:#8a9279;color:#fffbeb;font-family:'IBM Plex Sans',sans-serif;font-size:9px;line-height:1;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px">{{ cartCount }}</span></sc-if></span>
       </div>
     </div>
     <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(25,21,20,.4);z-index:30;opacity:{{ overlayOpacity }};visibility:{{ overlayVis }};transition:opacity .3s ease,visibility .3s ease"></div>
@@ -178,6 +178,11 @@
         </sc-if>
 
         <div style="font-size:13px;color:#8a9279;margin-top:18px">With {{ primary.ingredients }}</div>
+
+        <button class="neu-btn" onClick="{{ primary.onAddCart }}" style="margin-top:20px;border-radius:16px;padding:13px 28px;display:inline-flex;align-items:center;gap:10px;font-family:'Averia Serif Libre',serif;font-size:15px;color:#191514">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
+          Add to cart · {{ primary.priceText }}
+        </button>
       </div>
 
       <!-- alternates -->
@@ -272,11 +277,66 @@
                     <span style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;letter-spacing:.03em;color:#8a9279;border:1px solid rgba(138,146,121,.4);border-radius:10px;padding:3px 9px">{{ mb }}</span>
                   </sc-for>
                 </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid rgba(116,103,78,.18)">
+                  <span style="font-family:'Cormorant Garamond',serif;font-size:19px;color:#191514">{{ md.priceText }}</span>
+                  <button class="neu-btn" onClick="{{ md.onAdd }}" style="padding:8px 16px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#4d5a47">Add</button>
+                </div>
               </div>
             </sc-for>
           </div>
         </div>
       </sc-for>
+    </div>
+    </sc-if>
+
+    <!-- ============ CART / PICKUP ORDER ============ -->
+    <sc-if value="{{ isCart }}">
+    <div style="width:100%;max-width:560px;margin-top:36px;animation:fadeUp .5s ease both">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="neu-btn" onClick="{{ onViewMenu }}" aria-label="Back to menu" style="padding:8px 12px;font-size:15px">‹</button>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,4.4vw,32px);line-height:1.1;margin:0;color:#191514">Your order</h2>
+      </div>
+
+      <sc-if value="{{ cartEmpty }}">
+        <div class="neu-inset" style="margin-top:20px;padding:30px;text-align:center">
+          <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#5e6655;margin:0">Your order is empty.</p>
+          <button class="neu-btn" onClick="{{ onViewMenu }}" style="border-radius:16px;padding:12px 26px;margin-top:16px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4d5a47">Browse the menu</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasCartCount }}">
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ cartItems }}" as="ci">
+            <div class="neu-tile" style="padding:16px 18px;display:flex;align-items:center;gap:14px">
+              <div style="flex:1">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:#191514">{{ ci.name }}</div>
+                <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8a9279;margin-top:2px">{{ ci.priceText }} each</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <button class="neu-btn" onClick="{{ ci.onDec }}" aria-label="Less" style="padding:6px 12px;font-size:15px">–</button>
+                <span style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;min-width:18px;text-align:center;color:#191514">{{ ci.qty }}</span>
+                <button class="neu-btn" onClick="{{ ci.onInc }}" aria-label="More" style="padding:6px 12px;font-size:15px">+</button>
+              </div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:#191514;min-width:58px;text-align:right">{{ ci.lineText }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="neu-inset" style="margin-top:16px;padding:16px 20px;border-radius:16px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9aa08c">Total</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:#191514">{{ cartTotal }}</span>
+        </div>
+
+        <div style="text-align:center;margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:10px">
+          <button class="neu-btn" onClick="{{ onConfirmPickup }}" style="border-radius:18px;padding:15px 34px;font-family:'Averia Serif Libre',serif;font-size:16px;color:#191514">Review order for pickup</button>
+          <sc-if value="{{ cartConfirmed }}">
+            <div class="neu-inset" style="margin-top:8px;padding:18px 22px;border-radius:16px;text-align:center">
+              <div style="font-size:20px;color:#8a9279">✦</div>
+              <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;line-height:1.5;color:#191514;margin:8px 0 0">Your order is ready — show this screen at the counter for pickup. Payment is taken in person.</p>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
     </div>
     </sc-if>
 
@@ -314,44 +374,138 @@
       </sc-if>
 
       <sc-if value="{{ signedIn }}">
-        <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px">
-          <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,4.4vw,34px);line-height:1.1;margin:0;color:#191514">Welcome back, {{ accountEmail }}</h2>
-          <button class="neu-btn" onClick="{{ onSignOut }}" style="border-radius:13px;padding:9px 18px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7c8470">Sign out</button>
-        </div>
-        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.6;color:#6b7360;margin:10px 0 0;max-width:560px">Expanded herbal options are unlocked — they'll appear at the bottom of each consultation. Your saved consultations are recorded below.</p>
 
-        <sc-if value="{{ recordsLoading }}">
-          <div class="neu-inset" style="margin-top:24px;padding:24px;text-align:center">
-            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#5e6655;margin:0">Loading your journal…</p>
+        <!-- reminders panel (toggled by the bell, shown above either view) -->
+        <sc-if value="{{ showReminders }}">
+          <div class="neu-inset" style="margin-bottom:18px;padding:18px 20px;border-radius:16px">
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c">Reminders &amp; check-ins</div>
+            <sc-if value="{{ hasPhone }}">
+              <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.55;color:#5e6655;margin:8px 0 0">Check-ins are on for <span style="color:#8a9279">{{ phoneMasked }}</span> — we'll text gentle follow-ups about your consults.</p>
+            </sc-if>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.55;color:#6b7360;margin:8px 0 0">Add or update the mobile number for SMS follow-ups.</p>
+            <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+              <div style="flex:1;border-radius:14px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:3px"><input type="tel" autocomplete="tel" value="{{ phoneInput }}" onChange="{{ onPhoneInput }}" placeholder="+1 (___) ___ ____" style="width:100%;border:none;outline:none;background:transparent;font-family:'Jost',sans-serif;font-size:15px;color:#191514;padding:11px 13px"></div>
+              <button class="neu-btn" onClick="{{ onSavePhone }}" style="padding:11px 18px;font-family:'Jost',sans-serif;font-size:12px">Save</button>
+            </div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:#a7a994;margin-top:8px">No marketing — just your consults. Reply STOP anytime to opt out.</div>
           </div>
         </sc-if>
 
-        <sc-if value="{{ noRecords }}">
-          <div class="neu-inset" style="margin-top:24px;padding:30px;text-align:center">
-            <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#5e6655;margin:0">No saved consultations yet.</p>
-            <button class="neu-btn" onClick="{{ onGoApothecary }}" style="border-radius:16px;padding:12px 26px;margin-top:16px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4d5a47">Start a consultation</button>
+        <!-- ===== LIST VIEW ===== -->
+        <sc-if value="{{ jIsList }}">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
+            <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,4.4vw,34px);line-height:1.1;margin:0;color:#191514">Your journal</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="neu-btn" title="Reminders &amp; check-ins" aria-label="Reminders" onClick="{{ onToggleReminders }}" style="padding:9px 12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+              <button class="neu-btn" onClick="{{ onNewConsult }}" style="padding:9px 16px;font-family:'Jost',sans-serif;font-size:12px">+ New consult</button>
+              <button class="neu-btn" title="Account" aria-label="Account" onClick="{{ onGoAccount }}" style="padding:9px 12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+              <button class="neu-btn" onClick="{{ onSignOut }}" style="padding:9px 14px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#7c8470">Sign out</button>
+            </div>
           </div>
-        </sc-if>
 
-        <sc-if value="{{ hasRecords }}">
-          <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
-            <sc-for list="{{ records }}" as="rec" hint-placeholder-count="2">
-              <div class="neu-tile" style="padding:18px 20px">
-                <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#a7a994">{{ rec.date }}</div>
-                <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;line-height:1.15;margin-top:7px;color:#191514">For {{ rec.concern }}</div>
-                <sc-if value="{{ rec.hasHerbs }}">
-                  <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;color:#8a9279;margin-top:8px">{{ rec.herbsText }}</div>
-                </sc-if>
-                <div style="margin-top:12px">
-                  <sc-if value="{{ rec.tried }}">
-                    <span style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:.04em;color:#486235;background:rgba(72,98,53,.1);border:1px solid rgba(72,98,53,.38);border-radius:11px;padding:4px 11px">✓ Tried</span>
-                  </sc-if>
-                  <sc-if value="{{ rec.notTried }}">
-                    <button class="neu-btn" onClick="{{ rec.onTried }}" style="border-radius:11px;padding:6px 14px;font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#7c8470">Mark as tried</button>
-                  </sc-if>
+          <sc-if value="{{ consultsLoading }}">
+            <div class="neu-inset" style="margin-top:22px;padding:24px;text-align:center"><p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#5e6655;margin:0">Loading your journal…</p></div>
+          </sc-if>
+
+          <sc-if value="{{ noConsults }}">
+            <div class="neu-inset" style="margin-top:22px;padding:30px;text-align:center">
+              <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#5e6655;margin:0">No consultations yet.</p>
+              <button class="neu-btn" onClick="{{ onNewConsult }}" style="border-radius:16px;padding:12px 26px;margin-top:16px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4d5a47">Start a consultation</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasConsults }}">
+            <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ consults }}" as="c" hint-placeholder-count="2">
+                <div class="neu-tile" onClick="{{ c.onOpen }}" style="padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px">
+                  <div style="flex:1">
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;line-height:1.15;color:#191514">{{ c.title }}</div>
+                    <sc-if value="{{ c.hasSummary }}">
+                      <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#8a9279;margin:6px 0 0">{{ c.summary }}</p>
+                    </sc-if>
+                  </div>
+                  <span style="color:#8a9279;font-size:22px;line-height:1">⌄</span>
                 </div>
-              </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <!-- ===== THREAD VIEW ===== -->
+        <sc-if value="{{ jIsThread }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0">
+              <button class="neu-btn" onClick="{{ onBack }}" aria-label="Back" style="padding:8px 12px;font-size:15px">‹</button>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:500;line-height:1.1;color:#191514;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ activeTitle }}</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="neu-btn" title="Reminders &amp; check-ins" aria-label="Reminders" onClick="{{ onToggleReminders }}" style="padding:8px 11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+              <button class="neu-btn" title="Download PDF" aria-label="Download PDF" onClick="{{ onDownload }}" style="padding:8px 11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="M9.5 14.5 12 17l2.5-2.5"/></svg></button>
+              <button class="neu-btn" onClick="{{ onDeleteActive }}" aria-label="Delete" style="padding:8px 13px;color:#993c1d;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase">Delete</button>
+            </div>
+          </div>
+
+          <sc-if value="{{ msgsLoading }}">
+            <div class="neu-inset" style="margin-top:18px;padding:22px;text-align:center"><p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#5e6655;margin:0">Loading…</p></div>
+          </sc-if>
+
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:13px">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
+              <sc-if value="{{ m.isUser }}">
+                <div style="max-width:82%;margin-left:auto;text-align:right">
+                  <div style="background:#fffbeb;box-shadow:inset 4px 4px 9px #ebe1c4, inset -4px -4px 9px #ffffff;border-radius:16px;padding:12px 16px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#191514;text-align:left">{{ m.content }}</div>
+                  <span onClick="{{ m.onEdit }}" style="color:#c9bfa6;font-size:11px;cursor:pointer;margin-top:3px;display:inline-block">✎ edit</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ m.isApothecary }}">
+                <div style="max-width:90%;background:#fffbeb;box-shadow:6px 6px 13px #ece1c5, -6px -6px 13px #ffffff;border-radius:16px;padding:14px 17px;font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;line-height:1.6;color:#5e6655;white-space:pre-line">{{ m.content }}</div>
+              </sc-if>
             </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;margin-top:16px;border-radius:16px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:5px 6px">
+            <input type="text" value="{{ chatInput }}" onChange="{{ onChatInput }}" placeholder="Add a note or ask a follow-up…" style="flex:1;border:none;outline:none;background:transparent;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#191514;padding:11px 13px">
+            <button class="neu-btn" onClick="{{ onSend }}" style="padding:10px 18px;font-family:'Jost',sans-serif;font-size:12px">Send</button>
+          </div>
+        </sc-if>
+
+        <!-- ===== ACCOUNT VIEW ===== -->
+        <sc-if value="{{ jIsAccount }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="neu-btn" onClick="{{ onBack }}" aria-label="Back" style="padding:8px 12px;font-size:15px">‹</button>
+            <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,4.4vw,32px);line-height:1.1;margin:0;color:#191514">Account</h2>
+          </div>
+
+          <div class="neu-tile" style="margin-top:18px;padding:20px 22px">
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c">Notifications</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.55;color:#6b7360;margin:8px 0 0">A mobile number for gentle SMS check-ins about your consults. Reply STOP anytime to opt out.</p>
+            <div style="border-radius:14px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:3px;margin-top:10px"><input type="tel" autocomplete="tel" value="{{ phoneInput }}" onChange="{{ onPhoneInput }}" placeholder="+1 (___) ___ ____" style="width:100%;border:none;outline:none;background:transparent;font-family:'Jost',sans-serif;font-size:15px;color:#191514;padding:11px 13px"></div>
+          </div>
+
+          <div class="neu-tile" style="margin-top:14px;padding:20px 22px">
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c">Medications you take</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.55;color:#6b7360;margin:8px 0 0">So the apothecary can flag possible herb–drug interactions. Kept private to your account.</p>
+            <div style="border-radius:14px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:3px;margin-top:10px"><textarea value="{{ medsInput }}" onChange="{{ onMedsInput }}" rows="2" placeholder="e.g. sertraline, levothyroxine…" style="width:100%;border:none;outline:none;resize:vertical;background:transparent;font-family:'Jost',sans-serif;font-size:15px;line-height:1.5;color:#191514;padding:11px 13px"></textarea></div>
+
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c;margin-top:16px">Medical history / conditions</div>
+            <div style="border-radius:14px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:3px;margin-top:10px"><textarea value="{{ historyInput }}" onChange="{{ onHistoryInput }}" rows="3" placeholder="e.g. high blood pressure, pregnancy, anything relevant…" style="width:100%;border:none;outline:none;resize:vertical;background:transparent;font-family:'Jost',sans-serif;font-size:15px;line-height:1.5;color:#191514;padding:11px 13px"></textarea></div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:14px;margin-top:16px">
+            <button class="neu-btn" onClick="{{ onSaveAccount }}" style="padding:13px 28px;font-family:'Averia Serif Libre',serif;font-size:14px;color:#191514">{{ accountSaveLabel }}</button>
+            <sc-if value="{{ accountSaved }}"><span style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8a9279">✓ Saved</span></sc-if>
+          </div>
+
+          <div class="neu-tile" style="margin-top:22px;padding:20px 22px">
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c">Your data</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.55;color:#6b7360;margin:8px 0 12px">Download every consultation — a clean summary and the full conversations — as one PDF.</p>
+            <button class="neu-btn" onClick="{{ onDownloadAll }}" style="padding:11px 22px;font-family:'Jost',sans-serif;font-size:12px;color:#4d5a47">Download all consults</button>
+          </div>
+
+          <div class="neu-tile" style="margin-top:14px;padding:20px 22px">
+            <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9E6840">Danger zone</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;line-height:1.55;color:#6b7360;margin:8px 0 12px">Permanently delete your account and all consultations. This can't be undone.</p>
+            <button class="neu-btn" onClick="{{ onDeleteAccount }}" style="padding:11px 22px;font-family:'Jost',sans-serif;font-size:12px;color:#993c1d">Delete my account</button>
           </div>
         </sc-if>
       </sc-if>
@@ -380,10 +534,24 @@ class Component extends DCLogic {
     try { token = window.localStorage.getItem('lrl_token'); email = window.localStorage.getItem('lrl_email'); } catch (e) {}
     return { view:'apothecary', phase:'intake', query:'', selected:[], showNudge:false, result:null,
       token: token || null, account: token ? { email } : null,
-      records:[], recordsLoading:false, recordsLoaded:false,
+      consults:[], consultsLoading:false, consultsLoaded:false,
+      jView:'list', activeId:null, activeTitle:'', messages:[], msgsLoading:false, chatInput:'', chatBusy:false,
+      profile:null, profileLoaded:false, showReminders:false, phoneInput:'',
+      medsInput:'', historyInput:'', accountBusy:false, accountSaved:false, deleteBusy:false,
       authEmail:'', authPassword:'', authMode:'signin', authError:'', authMsg:'', authBusy:false,
-      savedFlag:false, saveBusy:false, saveError:'', drawerOpen:false };
+      savedFlag:false, saveBusy:false, saveError:'', drawerOpen:false,
+      cart:[], cartConfirmed:false };
   })();
+
+  // Placeholder menu prices (USD) — edit these to your real prices.
+  PRICES = {
+    'laurelate-chai':8, 'mct-coffee':6, 'sipping-chocolate':7,
+    'bay-laurel-hydrosol':6, 'mugwort-matcha':6.5, 'black-sage':5.5, 'yerba-santa':5.5,
+    'stinging-nettle':5.5, 'horsetail':5.5, 'elderberry':6, 'skullcap':5.5, 'yarrow':5.5,
+    'laurel-spritz':5, 'black-sage-soda':5, 'elderflower-soda':5, 'nettle-soup':11
+  };
+  priceOf(id){ return this.PRICES[id] || 0; }
+  money(n){ return '$' + (Math.round(n * 100) / 100).toFixed(2); }
 
   CHIP_ORDER = ['calm','sleep','immune','respiratory','energy','keto','menstrual','mood','minerals','tissue','grounding'];
 
@@ -720,7 +888,7 @@ class Component extends DCLogic {
         ]);
       } else {
         const res = await Promise.race([
-          fetch('/.netlify/functions/wellness-chat', {
+          fetch('/.netlify/functions/chat', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
             body:JSON.stringify({ prompt: this.buildPrompt(q), query: q })
@@ -758,12 +926,24 @@ class Component extends DCLogic {
   reset = () => this.setState({ view:'apothecary', phase:'intake', showNudge:false });
   goApothecary = () => this.setState({ view:'apothecary' });
   viewMenu = () => this.setState({ view:'menu' });
-  goJournal = () => { this.setState({ view:'journal' }); this.maybeLoadRecords(); };
+  goJournal = () => { this.setState({ view:'journal' }); this.maybeLoadJournal(); };
   toggleDrawer = () => this.setState(s => ({ drawerOpen: !s.drawerOpen }));
   closeDrawer = () => this.setState({ drawerOpen:false });
   navApothecary = () => this.setState({ view:'apothecary', drawerOpen:false });
   navMenu = () => this.setState({ view:'menu', drawerOpen:false });
-  navJournal = () => { this.setState({ view:'journal', drawerOpen:false }); this.maybeLoadRecords(); };
+  navJournal = () => { this.setState({ view:'journal', drawerOpen:false }); this.maybeLoadJournal(); };
+
+  // ---- cart (pickup order) ----
+  goCart = () => this.setState({ view:'cart', drawerOpen:false });
+  addToCart = (id) => () => this.setState(s => {
+    const ex = s.cart.find(i => i.id === id);
+    const cart = ex ? s.cart.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i) : [...s.cart, { id, qty: 1 }];
+    return { cart, cartConfirmed:false };
+  });
+  incCart = (id) => () => this.setState(s => ({ cart: s.cart.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i), cartConfirmed:false }));
+  decCart = (id) => () => this.setState(s => ({ cart: s.cart.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i).filter(i => i.qty > 0), cartConfirmed:false }));
+  removeCart = (id) => () => this.setState(s => ({ cart: s.cart.filter(i => i.id !== id), cartConfirmed:false }));
+  confirmPickup = () => { if (this.state.cart.length) this.setState({ cartConfirmed:true }); };
 
   // ---- backend helper ----
   api(path, opts) {
@@ -802,48 +982,193 @@ class Component extends DCLogic {
 
   signOut = () => {
     try { window.localStorage.removeItem('lrl_token'); window.localStorage.removeItem('lrl_email'); } catch (e) {}
-    this.setState({ token:null, account:null, records:[], recordsLoaded:false });
+    this.setState({ token:null, account:null, consults:[], consultsLoaded:false, messages:[], jView:'list', activeId:null, profile:null, profileLoaded:false });
   };
 
-  // ---- journal records ----
-  maybeLoadRecords = () => { if (this.state.token && !this.state.recordsLoaded && !this.state.recordsLoading) this.loadRecords(); };
-  loadRecords = async () => {
+  authHeaders = () => ({ 'Content-Type':'application/json', Authorization:'Bearer ' + this.state.token });
+
+  // ---- journal: consults, profile ----
+  maybeLoadJournal = () => {
     if (!this.state.token) return;
-    this.setState({ recordsLoading:true });
+    if (!this.state.consultsLoaded && !this.state.consultsLoading) this.loadConsults();
+    if (!this.state.profileLoaded) this.loadProfile();
+  };
+  loadConsults = async () => {
+    if (!this.state.token) return;
+    this.setState({ consultsLoading:true });
     try {
       const res = await this.api('consultations', { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
       if (res.status === 401) { this.signOut(); return; }
-      this.setState({ records: (res.ok && Array.isArray(res.body)) ? res.body : [], recordsLoading:false, recordsLoaded:true });
-    } catch (e) { this.setState({ recordsLoading:false, recordsLoaded:true }); }
+      this.setState({ consults: (res.ok && Array.isArray(res.body)) ? res.body : [], consultsLoading:false, consultsLoaded:true });
+    } catch (e) { this.setState({ consultsLoading:false, consultsLoaded:true }); }
+  };
+  loadProfile = async () => {
+    if (!this.state.token) return;
+    try {
+      const res = await this.api('profile', { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      const p = res.ok ? res.body : null;
+      this.setState({ profile: p, profileLoaded:true,
+        phoneInput: (p && p.phone) ? p.phone : '',
+        medsInput: (p && p.medications) ? p.medications : '',
+        historyInput: (p && p.medical_history) ? p.medical_history : '' });
+    } catch (e) { this.setState({ profileLoaded:true }); }
   };
 
+  // ---- account page ----
+  goAccount = () => { this.setState({ jView:'account', accountSaved:false, showReminders:false }); if (!this.state.profileLoaded) this.loadProfile(); };
+  onMedsInput = (e) => this.setState({ medsInput: e.target.value, accountSaved:false });
+  onHistoryInput = (e) => this.setState({ historyInput: e.target.value, accountSaved:false });
+  saveAccount = async () => {
+    if (!this.state.token) return;
+    const phone = (this.state.phoneInput || '').trim();
+    const body = { phone, sms_opt_in: !!phone, medications: this.state.medsInput || '', medical_history: this.state.historyInput || '' };
+    this.setState({ accountBusy:true, accountSaved:false });
+    try {
+      const res = await this.api('profile', { method:'POST', headers:this.authHeaders(), body: JSON.stringify(body) });
+      this.setState({ profile: res.ok ? res.body : this.state.profile, accountBusy:false, accountSaved: res.ok });
+    } catch (e) { this.setState({ accountBusy:false }); }
+  };
+  downloadAll = async () => {
+    if (!this.state.token) return;
+    const esc = t => (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    let sections = '';
+    try {
+      const cs = await this.api('consultations', { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      const list = (cs.ok && Array.isArray(cs.body)) ? cs.body : [];
+      for (const c of list) {
+        const ms = await this.api('messages?consultation_id=' + c.id, { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+        const msgs = (ms.ok && Array.isArray(ms.body)) ? ms.body : [];
+        const lines = msgs.map(m => '<p style="margin:0 0 8px"><strong>' + (m.role === 'user' ? 'You' : 'Apothecary') + ':</strong> ' + esc(m.content).replace(/\n/g,'<br>') + '</p>').join('');
+        sections += '<h2 style="margin:28px 0 4px">' + esc(c.title || 'Consultation') + '</h2>' + (c.summary ? ('<p style="color:#666;margin:0 0 10px">' + esc(c.summary) + '</p>') : '') + lines;
+      }
+    } catch (e) {}
+    const html = '<html><head><title>Laurelate journal</title></head><body style="font-family:Georgia,serif;max-width:660px;margin:40px auto;color:#191514;line-height:1.6"><h1>Laurelate — wellness journal</h1><p style="color:#888">' + new Date().toLocaleDateString() + '</p>' + (sections || '<p>No consultations yet.</p>') + '</body></html>';
+    try { const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 400); } catch (e) {}
+  };
+  deleteAccount = async () => {
+    if (!this.state.token) return;
+    let ok = false; try { ok = window.confirm('Permanently delete your account and all your consultations? This cannot be undone.'); } catch (e) { ok = false; }
+    if (!ok) return;
+    this.setState({ deleteBusy:true });
+    try { await this.api('delete-account', { method:'POST', headers:this.authHeaders() }); } catch (e) {}
+    this.signOut();
+    try { window.alert('Your account and data have been deleted.'); } catch (e) {}
+  };
+
+  // ---- a single consult thread ----
+  openConsult = (id, title) => async () => {
+    this.setState({ jView:'thread', activeId:id, activeTitle: title || 'Consultation', messages:[], msgsLoading:true, showReminders:false });
+    try {
+      const res = await this.api('messages?consultation_id=' + id, { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      this.setState({ messages: (res.ok && Array.isArray(res.body)) ? res.body : [], msgsLoading:false });
+    } catch (e) { this.setState({ msgsLoading:false }); }
+  };
+  backToList = () => { this.setState({ jView:'list', activeId:null, messages:[], showReminders:false }); this.loadConsults(); };
+  newConsult = async () => {
+    if (!this.state.token) return;
+    try {
+      const res = await this.api('consultations', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ title:'New consultation', kind:'acute' }) });
+      if (res.ok && res.body && res.body.id) { this.openConsult(res.body.id, 'New consultation')(); }
+    } catch (e) {}
+  };
+
+  onChatInput = (e) => this.setState({ chatInput: e.target.value });
+  formatHerbReply = (r) => {
+    let s = '';
+    if (r.primary) {
+      s += r.primary.name + (r.primary.latin ? (' (' + r.primary.latin + ')') : '') + ' — ' + (r.primary.why || '');
+      if (r.primary.preparation) s += ' ' + r.primary.preparation;
+      if (r.primary.cautions) s += ' Note: ' + r.primary.cautions;
+    }
+    if (Array.isArray(r.also_consider) && r.also_consider.length) s += '\n\nYou might also consider: ' + r.also_consider.map(a => a.name).join(', ') + '.';
+    if (r.lifestyle_note) s += '\n\n' + r.lifestyle_note;
+    return s.trim();
+  };
+  sendChat = async () => {
+    const text = (this.state.chatInput || '').trim();
+    const cid = this.state.activeId;
+    if (!text || !cid || !this.state.token) return;
+    const temp = { id: 'tmp-' + Date.now(), role: 'user', content: text };
+    this.setState(s => ({ messages: [...s.messages, temp], chatInput: '', chatBusy: true }));
+    try {
+      await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role: 'user', content: text }) });
+      let reply = '';
+      try {
+        const p = this.state.profile || {};
+        const r = await this.api('wellness-chat', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ concern: text, medications: p.medications || '', medical_history: p.medical_history || '' }) });
+        if (r.ok && r.body && r.body.result) reply = this.formatHerbReply(r.body.result);
+      } catch (e) {}
+      if (!reply) reply = 'Noted — thank you for the update. Tell me how things shift and I can suggest the next step.';
+      await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role: 'apothecary', content: reply }) });
+      const res = await this.api('messages?consultation_id=' + cid, { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      this.setState({ messages: (res.ok && Array.isArray(res.body)) ? res.body : this.state.messages, chatBusy:false });
+    } catch (e) { this.setState({ chatBusy:false }); }
+  };
+  editMessage = (id, current) => async () => {
+    if (!this.state.token || !id) return;
+    let next = null;
+    try { next = window.prompt('Edit your message:', current || ''); } catch (e) { next = null; }
+    if (next === null) return;
+    next = next.trim(); if (!next) return;
+    this.setState(s => ({ messages: s.messages.map(m => m.id === id ? { ...m, content: next } : m) }));
+    try { await this.api('messages', { method:'PATCH', headers:this.authHeaders(), body: JSON.stringify({ id, content: next }) }); } catch (e) {}
+  };
+  deleteActive = async () => {
+    const cid = this.state.activeId;
+    if (!cid || !this.state.token) return;
+    let ok = true; try { ok = window.confirm('Delete this consultation and its conversation?'); } catch (e) { ok = true; }
+    if (!ok) return;
+    try { await this.api('consultations?id=' + cid, { method:'DELETE', headers:{ Authorization:'Bearer ' + this.state.token } }); } catch (e) {}
+    this.backToList();
+  };
+  downloadActive = () => {
+    const title = this.state.activeTitle || 'Consultation';
+    const msgs = this.state.messages || [];
+    const esc = t => (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const lines = msgs.map(m => '<p style="margin:0 0 12px"><strong>' + (m.role === 'user' ? 'You' : 'Apothecary') + ':</strong> ' + esc(m.content).replace(/\n/g,'<br>') + '</p>').join('');
+    const summary = msgs.length ? esc(msgs[0].content) : '';
+    const html = '<html><head><title>' + esc(title) + '</title></head><body style="font-family:Georgia,serif;max-width:640px;margin:40px auto;color:#191514;line-height:1.6"><h1>Laurelate — ' + esc(title) + '</h1><p style="color:#888">' + new Date().toLocaleDateString() + '</p><h3>Summary</h3><p>' + summary + '</p><h3>Conversation</h3>' + lines + '</body></html>';
+    try { const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 350); } catch (e) {}
+  };
+
+  // ---- reminders / SMS ----
+  toggleReminders = () => this.setState(s => ({ showReminders: !s.showReminders }));
+  onPhoneInput = (e) => this.setState({ phoneInput: e.target.value });
+  savePhone = async () => {
+    const phone = (this.state.phoneInput || '').trim();
+    if (!phone || !this.state.token) return;
+    try {
+      const res = await this.api('profile', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ phone, sms_opt_in: true }) });
+      if (res.ok) this.setState({ profile: res.body, showReminders: false });
+    } catch (e) {}
+  };
+
+  // ---- save a café result into the journal as a new thread ----
   saveRecord = async () => {
     const r = this.state.result;
     if (!r || !this.state.token) return;
     const d = this.byId(r.primaryId);
-    const herbList = this.expandedRank(r.active || []).slice(0, 3).map(id => { const h = this.herbById(id); return h ? h.name : ''; }).filter(Boolean);
-    const concern = r.labelText || 'how you felt';
-    const herbs = [ d ? ('Café: ' + d.name) : '', herbList.length ? ('Apothecary: ' + herbList.join(', ')) : '' ].filter(Boolean).join(' · ');
+    const inquiry = (this.state.query || '').trim() || ('Looking for ' + (r.labelText || 'support') + '.');
+    const why = this.whyForResult(d, r);
+    const rec = d ? (d.name + (why ? (' — ' + why) : '')) : (r.labelText || '');
     this.setState({ saveBusy:true, saveError:'' });
     try {
-      const res = await this.api('consultations', { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + this.state.token }, body: JSON.stringify({ concern, herbs, notes: d ? d.name : null }) });
-      if (res.status === 401) { this.setState({ saveBusy:false, saveError:'Your session expired — please sign in again.' }); return; }
-      if (!res.ok) { this.setState({ saveBusy:false, saveError: res.body.error || 'Could not save.' }); return; }
-      this.setState(s => ({ records: [res.body, ...s.records], savedFlag:true, saveBusy:false }));
+      const c = await this.api('consultations', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ title: r.labelText || (d ? d.name : 'Consultation'), kind:'acute', summary: d ? ('Suggested ' + d.name + ' for ' + (r.labelText || 'how you felt')) : '' }) });
+      if (c.status === 401) { this.setState({ saveBusy:false, saveError:'Your session expired — please sign in again.' }); return; }
+      if (!c.ok || !c.body || !c.body.id) { this.setState({ saveBusy:false, saveError: (c.body && c.body.error) || 'Could not save.' }); return; }
+      const cid = c.body.id;
+      await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role:'user', content: inquiry }) });
+      await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role:'apothecary', content: rec }) });
+      this.setState({ savedFlag:true, saveBusy:false, consultsLoaded:false });
     } catch (e) { this.setState({ saveBusy:false, saveError:'Could not reach the server.' }); }
   };
 
-  markTried = (id) => async () => {
-    if (!this.state.token || !id) return;
-    this.setState(s => ({ records: s.records.map(x => x.id === id ? { ...x, tried:true } : x) }));
-    try {
-      await this.api('consultations', { method:'PATCH', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + this.state.token }, body: JSON.stringify({ id, tried:true }) });
-    } catch (e) {}
-  };
-
   renderVals(){
-    const { view, phase, query, selected, showNudge, result, account, token, records, savedFlag,
-            authEmail, authPassword, authMode, authError, authMsg, authBusy, recordsLoading, saveBusy, saveError } = this.state;
+    const { view, phase, query, selected, showNudge, result, account, token, savedFlag,
+            consults, consultsLoading, jView, activeId, activeTitle, messages, msgsLoading, chatInput, chatBusy,
+            profile, showReminders, phoneInput, medsInput, historyInput, accountBusy, accountSaved, deleteBusy,
+            authEmail, authPassword, authMode, authError, authMsg, authBusy, saveBusy, saveError,
+            cart, cartConfirmed } = this.state;
     const altCount = Math.max(0, Math.min(3, this.props.altCount ?? 2));
     const showWhyProp = this.props.showWhy ?? true;
 
@@ -878,24 +1203,39 @@ class Component extends DCLogic {
       drinks: this.DRINKS.filter(d => d.category === cat).map(d => ({
         id:d.id, name:d.name, latin:d.latin||'', hasLatin:!!d.latin,
         desc:d.desc, ingredients:d.ingredients, benefits:d.benefits,
-        allergens:d.allergens||'', hasAllergens:!!d.allergens
+        allergens:d.allergens||'', hasAllergens:!!d.allergens,
+        priceText: this.money(this.priceOf(d.id)), onAdd: this.addToCart(d.id)
       }))
     }));
 
-    // Journal records
-    const fmtDate = (iso) => { try { return new Date(iso).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }); } catch (e) { return ''; } };
-    const recordsView = (records || []).map(r => ({
-      id: r.id,
-      date: r.created_at ? fmtDate(r.created_at) : (r.date || ''),
-      concern: r.concern || '',
-      herbsText: r.herbs || '',
-      hasHerbs: !!r.herbs,
-      notes: r.notes || '',
-      hasNotes: !!r.notes,
-      tried: !!r.tried,
-      notTried: !r.tried,
-      onTried: this.markTried(r.id)
+    // Cart (pickup order)
+    const cartItems = (cart || []).map(i => {
+      const d = this.byId(i.id);
+      const unit = this.priceOf(i.id);
+      return { id:i.id, name: d ? d.name : i.id, qty:i.qty,
+        priceText: this.money(unit), lineText: this.money(unit * i.qty),
+        onInc: this.incCart(i.id), onDec: this.decCart(i.id), onRemove: this.removeCart(i.id) };
+    });
+    const cartCount = (cart || []).reduce((n, i) => n + i.qty, 0);
+    const cartTotalNum = (cart || []).reduce((s, i) => s + this.priceOf(i.id) * i.qty, 0);
+
+    // Journal — consult list + active thread
+    const consultsView = (consults || []).map(c => ({
+      id: c.id,
+      title: c.title || 'Consultation',
+      summary: c.summary || c.concern || '',
+      hasSummary: !!(c.summary || c.concern),
+      onOpen: this.openConsult(c.id, c.title || 'Consultation')
     }));
+    const messagesView = (messages || []).map(m => ({
+      id: m.id,
+      isUser: m.role === 'user',
+      isApothecary: m.role === 'apothecary',
+      content: m.content || '',
+      onEdit: m.role === 'user' ? this.editMessage(m.id, m.content || '') : (() => {})
+    }));
+    const hasPhone = !!(profile && profile.phone);
+    const phoneMasked = hasPhone ? ('•••• ' + String(profile.phone).slice(-4)) : '';
 
     // Drawer
     const drawerTransform = this.state.drawerOpen ? 'translateX(0)' : 'translateX(-100%)';
@@ -907,6 +1247,12 @@ class Component extends DCLogic {
       isConsulting: onApothecary && phase === 'loading',
       isResults: onApothecary && phase === 'result',
       isMenu: view === 'menu',
+      isCart: view === 'cart',
+      cartItems, cartCount, hasCartCount: cartCount > 0,
+      cartTotal: this.money(cartTotalNum),
+      cartEmpty: cartItems.length === 0,
+      cartConfirmed,
+      onGoCart: this.goCart, onConfirmPickup: this.confirmPickup,
       isJournal: view === 'journal',
 
       note: query,
@@ -920,10 +1266,35 @@ class Component extends DCLogic {
 
       signedIn, signedOut: !signedIn,
       accountEmail: account ? (account.email || '') : '',
-      records: recordsView,
-      hasRecords: recordsView.length > 0,
-      noRecords: recordsView.length === 0 && !recordsLoading,
-      recordsLoading,
+
+      jIsList: jView === 'list',
+      jIsThread: jView === 'thread',
+      jIsAccount: jView === 'account',
+      onGoAccount: this.goAccount,
+      medsInput, historyInput,
+      onMedsInput: this.onMedsInput, onHistoryInput: this.onHistoryInput,
+      onSaveAccount: this.saveAccount, accountBusy, accountSaved,
+      accountSaveLabel: accountBusy ? 'Saving…' : 'Save',
+      onDownloadAll: this.downloadAll, onDeleteAccount: this.deleteAccount, deleteBusy,
+      consults: consultsView,
+      hasConsults: consultsView.length > 0,
+      noConsults: consultsView.length === 0 && !consultsLoading,
+      consultsLoading,
+      activeTitle,
+      messages: messagesView,
+      hasMessages: messagesView.length > 0,
+      msgsLoading,
+      chatInput, chatBusy,
+      onChatInput: this.onChatInput,
+      onSend: this.sendChat,
+      onBack: this.backToList,
+      onNewConsult: this.newConsult,
+      onDeleteActive: this.deleteActive,
+      onDownload: this.downloadActive,
+      showReminders, onToggleReminders: this.toggleReminders,
+      hasPhone, phoneMasked, phoneInput,
+      onPhoneInput: this.onPhoneInput, onSavePhone: this.savePhone,
+
       authEmail, authPassword,
       authError, hasAuthError: !!authError,
       authMsg, hasAuthMsg: !!authMsg,
@@ -969,7 +1340,8 @@ class Component extends DCLogic {
       id:d.id, category:d.category, name:d.name,
       latin:d.latin||'', hasLatin:!!d.latin,
       desc:d.desc, ingredients:d.ingredients, benefits:d.benefits,
-      why:this.whyForResult(d, result)
+      why:this.whyForResult(d, result),
+      priceText: this.money(this.priceOf(d.id)), onAddCart: this.addToCart(d.id)
     });
 
     const primary = decorate(this.byId(result.primaryId));

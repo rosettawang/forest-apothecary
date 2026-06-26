@@ -32,6 +32,7 @@ Rules:
 - Be specific — name the active constituents or traditional mechanisms where helpful
 - Be warm and human, not clinical
 - If the concern could indicate something serious, gently note that seeing a practitioner is wise
+- If the person lists medications or medical conditions, check whether any suggested herb could interact with them or be unwise given their history. If so, say it clearly in "cautions" (name the interaction). If a herb would be risky, choose a safer alternative instead.
 - Reply with ONLY the JSON object, no prose, no code fences`;
 
 exports.handler = async (event) => {
@@ -39,17 +40,24 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: JSON.stringify({ error: 'Method not allowed' }) };
 
   try {
-    const { concern } = JSON.parse(event.body || '{}');
+    const { concern, medications, medical_history } = JSON.parse(event.body || '{}');
     if (!concern) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'concern required' }) };
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'API key not configured' }) };
 
+    let userContent = concern;
+    if (medications && String(medications).trim()) userContent += '\n\nMedications they take: ' + medications;
+    if (medical_history && String(medical_history).trim()) userContent += '\n\nMedical history / conditions: ' + medical_history;
+    if ((medications && String(medications).trim()) || (medical_history && String(medical_history).trim())) {
+      userContent += '\n\nPlease check the suggested herbs against the above and flag any interactions or cautions.';
+    }
+
     const requestBody = JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 700,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: concern }]
+      messages: [{ role: 'user', content: userContent }]
     });
 
     const text = await new Promise((resolve, reject) => {

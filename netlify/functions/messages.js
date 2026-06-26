@@ -39,40 +39,35 @@ exports.handler = async (event) => {
 
   try {
     if (event.httpMethod === 'GET') {
-      const res = await supabase('/rest/v1/consultations?select=*&archived=eq.false&order=updated_at.desc', 'GET', null, token);
-      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to fetch consultations' }) };
+      const cid = event.queryStringParameters && event.queryStringParameters.consultation_id;
+      if (!cid) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'consultation_id required' }) };
+      const res = await supabase(`/rest/v1/messages?consultation_id=eq.${cid}&select=*&order=created_at.asc`, 'GET', null, token);
+      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to fetch messages' }) };
       return { statusCode: 200, headers: CORS, body: JSON.stringify(res.body || []) };
     }
 
     if (event.httpMethod === 'POST') {
-      const { title, kind, summary, status } = JSON.parse(event.body || '{}');
-      const row = { title: title || 'New consultation', kind: kind || 'acute' };
-      if (summary !== undefined) row.summary = summary;
-      if (status !== undefined) row.status = status;
-      const res = await supabase('/rest/v1/consultations', 'POST', row, token);
-      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to create consultation' }) };
+      const { consultation_id, role, content } = JSON.parse(event.body || '{}');
+      if (!consultation_id || !role || !content) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'consultation_id, role and content required' }) };
+      if (role !== 'user' && role !== 'apothecary') return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'role must be user or apothecary' }) };
+      const res = await supabase('/rest/v1/messages', 'POST', { consultation_id, role, content }, token);
+      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to save message' }) };
       return { statusCode: 201, headers: CORS, body: JSON.stringify(Array.isArray(res.body) ? res.body[0] : res.body) };
     }
 
     if (event.httpMethod === 'PATCH') {
-      const { id, title, summary, status, kind, archived } = JSON.parse(event.body || '{}');
-      if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required' }) };
-      const updates = {};
-      if (title !== undefined) updates.title = title;
-      if (summary !== undefined) updates.summary = summary;
-      if (status !== undefined) updates.status = status;
-      if (kind !== undefined) updates.kind = kind;
-      if (archived !== undefined) updates.archived = archived;
-      const res = await supabase(`/rest/v1/consultations?id=eq.${id}`, 'PATCH', updates, token);
-      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to update consultation' }) };
+      const { id, content } = JSON.parse(event.body || '{}');
+      if (!id || content === undefined) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id and content required' }) };
+      const res = await supabase(`/rest/v1/messages?id=eq.${id}`, 'PATCH', { content }, token);
+      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to edit message' }) };
       return { statusCode: 200, headers: CORS, body: JSON.stringify(Array.isArray(res.body) ? res.body[0] : res.body) };
     }
 
     if (event.httpMethod === 'DELETE') {
       const id = (event.queryStringParameters && event.queryStringParameters.id) || JSON.parse(event.body || '{}').id;
       if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required' }) };
-      const res = await supabase(`/rest/v1/consultations?id=eq.${id}`, 'DELETE', null, token);
-      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to delete consultation' }) };
+      const res = await supabase(`/rest/v1/messages?id=eq.${id}`, 'DELETE', null, token);
+      if (res.status >= 400) return { statusCode: res.status, headers: CORS, body: JSON.stringify({ error: 'Failed to delete message' }) };
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true }) };
     }
 
