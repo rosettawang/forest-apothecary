@@ -42,7 +42,14 @@ exports.handler = async (event) => {
 
   try {
     const { action, email, password } = JSON.parse(event.body || '{}');
-    if (!email || !password) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Email and password required' }) };
+    if (!email) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Email required' }) };
+    if ((action === 'signup' || action === 'signin') && !password) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Password required' }) };
+
+    if (action === 'resend') {
+      const res = await supabaseRequest('/auth/v1/resend', 'POST', { type: 'signup', email });
+      if (res.body && res.body.error) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: res.body.error.message || res.body.error }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ message: 'Confirmation email sent again — check your inbox (and spam).' }) };
+    }
 
     if (action === 'signup') {
       const res = await supabaseRequest('/auth/v1/signup', 'POST', { email, password });
@@ -56,7 +63,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ access_token: res.body.access_token, user: res.body.user }) };
     }
 
-    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown action. Use "signup" or "signin".' }) };
+    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown action. Use "signup", "signin", or "resend".' }) };
   } catch (err) {
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
   }

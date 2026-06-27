@@ -68,22 +68,33 @@ const run = async () => {
     const phoneByUser = {};
     (profs.body || []).forEach(p => { if (p.sms_opt_in && p.phone) phoneByUser[p.id] = p.phone; });
 
-    let sent = 0;
+    let sent = 0, requeued = 0;
     for (const r of rows) {
       const phone = phoneByUser[r.user_id];
       if (phone) {
         const resp = await sendSms(phone, r.message);
         if (resp.status >= 200 && resp.status < 300) sent++;
       }
-      // mark sent regardless so we don't retry forever on a bad number
-      await supabase(`/rest/v1/reminders?id=eq.${r.id}`, 'PATCH', { sent: true });
+      if (r.repeat === 'daily') {
+        // re-queue for the next day, keeping the same local clock time.
+        // Advance from the scheduled time (not "now") and skip past any missed days.
+        const next = new Date(r.send_at);
+        const now = new Date();
+        do { next.setUTCDate(next.getUTCDate() + 1); } while (next <= now);
+        await supabase(`/rest/v1/reminders?id=eq.${r.id}`, 'PATCH', { send_at: next.toISOString(), sent: false });
+        requeued++;
+      } else {
+        // one-shot: mark sent regardless so we don't retry forever on a bad number
+        await supabase(`/rest/v1/reminders?id=eq.${r.id}`, 'PATCH', { sent: true });
+      }
     }
-    return { statusCode: 200, body: `Processed ${rows.length} reminders, sent ${sent}.` };
+    return { statusCode: 200, body: `Processed ${rows.length} reminders, sent ${sent}, requeued ${requeued}.` };
   } catch (err) {
     return { statusCode: 500, body: 'Reminder error: ' + err.message };
   }
 };
 
-let handler = run;
-try { handler = require('@netlify/functions').schedule('*/15 * * * *', run); } catch (e) { /* @netlify/functions not present; export plain handler */ }
-exports.handler = handler;
+// Scheduled via netlify.toml ([functions."send-reminders"] schedule = "*/15 * * * *").
+// Exported as a plain handler so the cron registration lives in one place and the
+// endpoint can also be invoked manually for testing.
+exports.handler = run;
