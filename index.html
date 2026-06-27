@@ -15,6 +15,10 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes lrlPulse{0%,100%{opacity:.5; transform:scale(.95)} 50%{opacity:1; transform:scale(1)}}
+  @keyframes lrlTyping{0%,80%,100%{opacity:.3; transform:translateY(0)} 40%{opacity:1; transform:translateY(-3px)}}
+  .lrl-typing span{ display:inline-block; width:6px; height:6px; border-radius:50%; background:#8a9279; margin:0 2px; animation:lrlTyping 1.2s ease-in-out infinite; }
+  .lrl-typing span:nth-child(2){ animation-delay:.18s; }
+  .lrl-typing span:nth-child(3){ animation-delay:.36s; }
   textarea::placeholder, input::placeholder { color: #9aa08c; }
   ::selection{ background:#8a9279; color:#fffbeb; }
   /* neumorphic surfaces */
@@ -112,7 +116,7 @@
       </div>
 
       <div style="width:100%;border-radius:22px;background:#fffbeb;box-shadow:inset 6px 6px 13px #ebe1c4, inset -6px -6px 13px #ffffff;padding:6px">
-        <textarea class="noteinput" value="{{ note }}" onChange="{{ onNote }}" placeholder="Want to tell us a little more about how you're feeling?" rows="3" style="width:100%;border:none;outline:none;resize:none;background:transparent;font-family:'Jost',sans-serif;font-size:15.5px;line-height:1.6;color:#191514;padding:16px 18px"></textarea>
+        <textarea class="noteinput" value="{{ note }}" onChange="{{ onNote }}" onKeyDown="{{ onNoteKey }}" placeholder="Want to tell us a little more about how you're feeling? (⌘↵ to consult)" rows="3" style="width:100%;border:none;outline:none;resize:none;background:transparent;font-family:'Jost',sans-serif;font-size:15.5px;line-height:1.6;color:#191514;padding:16px 18px"></textarea>
       </div>
 
       <button class="consultbtn neu-btn" onClick="{{ onConsult }}" style="width:100%;border-radius:19px;padding:19px 28px;margin-top:26px;display:flex;align-items:center;justify-content:center;gap:11px;font-family:'Averia Serif Libre',serif;font-size:18px;color:#191514">
@@ -145,6 +149,8 @@
     <!-- ============ RESULT ============ -->
     <sc-if value="{{ isResults }}">
     <div style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-top:40px;animation:fadeUp .5s ease both">
+
+      <button class="notsure neu-btn" onClick="{{ onReset }}" style="align-self:center;border-radius:14px;padding:9px 20px;margin-bottom:22px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7c8470">↺ Ask again</button>
 
       <div style="font-family:'Jost',sans-serif;letter-spacing:.18em;font-size:11px;text-transform:uppercase;color:#9aa08c;margin-bottom:10px">Your consultation</div>
       <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(24px,5vw,32px);line-height:1.2;text-align:center;margin:0 0 8px;color:#191514">For <span style="color:#8a9279">{{ matchLabelsText }}</span>, the Apothecary suggests</h2>
@@ -182,6 +188,10 @@
         <button class="neu-btn" onClick="{{ primary.onAddCart }}" style="margin-top:20px;border-radius:16px;padding:13px 28px;display:inline-flex;align-items:center;gap:10px;font-family:'Averia Serif Libre',serif;font-size:15px;color:#191514">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4d5a47" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5h12l-1 11.5H7L6 8.5z"/><path d="M9 8.5a3 3 0 0 1 6 0"/></svg>
           Add to cart · {{ primary.priceText }}
+        </button>
+        <button class="neu-btn" onClick="{{ onRemindPrimary }}" style="margin-top:11px;border-radius:14px;padding:10px 20px;display:inline-flex;align-items:center;gap:8px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7c8470">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c8470" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg>
+          Remind me to drink this
         </button>
       </div>
 
@@ -369,6 +379,10 @@
 
           <button class="neu-btn" onClick="{{ onAuthSubmit }}" style="border-radius:16px;padding:14px 32px;margin-top:22px;font-family:'Averia Serif Libre',serif;font-size:15px;color:#191514">{{ authSubmitLabel }}</button>
 
+          <sc-if value="{{ canResend }}">
+            <div style="margin-top:14px"><span onClick="{{ onResend }}" style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8a9279;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Didn't get it? Send the confirmation email again</span></div>
+          </sc-if>
+
           <div style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;color:#6b7360;margin-top:18px">{{ authTogglePrompt }} <span onClick="{{ onAuthToggle }}" style="color:#8a9279;cursor:pointer;text-decoration:underline;text-underline-offset:3px">{{ authToggleLabel }}</span></div>
         </div>
       </sc-if>
@@ -388,6 +402,35 @@
               <button class="neu-btn" onClick="{{ onSavePhone }}" style="padding:11px 18px;font-family:'Jost',sans-serif;font-size:12px">Save</button>
             </div>
             <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:#a7a994;margin-top:8px">No marketing — just your consults. Reply STOP anytime to opt out.</div>
+
+            <div style="border-top:1px dashed rgba(116,103,78,.3);margin-top:16px;padding-top:14px">
+              <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c">Set a reminder</div>
+              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+                <div style="border-radius:12px;background:#fffbeb;box-shadow:inset 4px 4px 9px #ebe1c4, inset -4px -4px 9px #ffffff;padding:2px"><input type="time" value="{{ remTime }}" onChange="{{ onRemTime }}" style="border:none;outline:none;background:transparent;font-family:'Jost',sans-serif;font-size:14px;color:#191514;padding:9px 11px"></div>
+                <button class="neu-btn" onClick="{{ onToggleRemRepeat }}" title="Tap to switch" style="padding:9px 15px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.06em;color:#4d5a47">{{ remRepeatLabel }}</button>
+              </div>
+              <div style="border-radius:12px;background:#fffbeb;box-shadow:inset 4px 4px 9px #ebe1c4, inset -4px -4px 9px #ffffff;padding:2px;margin-top:8px"><input type="text" value="{{ remMessage }}" onChange="{{ onRemMessage }}" placeholder="e.g. Time for your Nettle Infusion" style="width:100%;border:none;outline:none;background:transparent;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#191514;padding:10px 12px"></div>
+              <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+                <button class="neu-btn" onClick="{{ onSaveReminder }}" style="padding:10px 20px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#4d5a47">{{ remSetLabel }}</button>
+                <sc-if value="{{ remSaved }}"><span style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8a9279">✓ Reminder set</span></sc-if>
+              </div>
+              <sc-if value="{{ hasRemError }}"><div style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#9E6840;margin-top:8px">{{ remError }}</div></sc-if>
+
+              <sc-if value="{{ hasReminders }}">
+                <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9aa08c;margin-top:16px">Upcoming</div>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ reminders }}" as="rm" hint-placeholder-count="1">
+                    <div style="display:flex;align-items:center;gap:10px;background:#fffbeb;box-shadow:4px 4px 9px #ece1c5, -4px -4px 9px #ffffff;border-radius:12px;padding:10px 13px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font-family:'Jost',sans-serif;font-size:11.5px;letter-spacing:.04em;color:#4d5a47">{{ rm.whenLabel }}</div>
+                        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#5e6655;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ rm.message }}</div>
+                      </div>
+                      <span onClick="{{ rm.onDelete }}" title="Remove" style="color:#b07a5b;font-size:18px;cursor:pointer;line-height:1">×</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
           </div>
         </sc-if>
 
@@ -405,6 +448,12 @@
 
           <sc-if value="{{ consultsLoading }}">
             <div class="neu-inset" style="margin-top:22px;padding:24px;text-align:center"><p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#5e6655;margin:0">Loading your journal…</p></div>
+          </sc-if>
+
+          <sc-if value="{{ hasConsultError }}">
+            <div class="neu-inset" style="margin-top:18px;padding:14px 18px;text-align:center">
+              <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.5;color:#a8502f;margin:0">{{ consultError }}</p>
+            </div>
           </sc-if>
 
           <sc-if value="{{ noConsults }}">
@@ -461,6 +510,9 @@
                 <div style="max-width:90%;background:#fffbeb;box-shadow:6px 6px 13px #ece1c5, -6px -6px 13px #ffffff;border-radius:16px;padding:14px 17px;font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;line-height:1.6;color:#5e6655;white-space:pre-line">{{ m.content }}</div>
               </sc-if>
             </sc-for>
+            <sc-if value="{{ chatBusy }}">
+              <div class="lrl-typing" aria-label="The apothecary is composing a reply" style="max-width:90%;background:#fffbeb;box-shadow:6px 6px 13px #ece1c5, -6px -6px 13px #ffffff;border-radius:16px;padding:16px 18px;display:flex;align-items:center"><span></span><span></span><span></span></div>
+            </sc-if>
           </div>
 
           <div style="display:flex;align-items:center;gap:10px;margin-top:16px;border-radius:16px;background:#fffbeb;box-shadow:inset 5px 5px 11px #ebe1c4, inset -5px -5px 11px #ffffff;padding:5px 6px">
@@ -537,6 +589,8 @@ class Component extends DCLogic {
       consults:[], consultsLoading:false, consultsLoaded:false,
       jView:'list', activeId:null, activeTitle:'', messages:[], msgsLoading:false, chatInput:'', chatBusy:false,
       profile:null, profileLoaded:false, showReminders:false, phoneInput:'',
+      reminders:[], remindersLoaded:false, remindersLoading:false,
+      remTime:'09:00', remRepeat:'daily', remMessage:'', remBusy:false, remError:'', remSaved:false,
       medsInput:'', historyInput:'', accountBusy:false, accountSaved:false, deleteBusy:false,
       authEmail:'', authPassword:'', authMode:'signin', authError:'', authMsg:'', authBusy:false,
       savedFlag:false, saveBusy:false, saveError:'', drawerOpen:false,
@@ -553,11 +607,11 @@ class Component extends DCLogic {
   priceOf(id){ return this.PRICES[id] || 0; }
   money(n){ return '$' + (Math.round(n * 100) / 100).toFixed(2); }
 
-  CHIP_ORDER = ['calm','sleep','immune','respiratory','energy','keto','menstrual','mood','minerals','tissue','grounding'];
+  CHIP_ORDER = ['calm','sleep','immune','respiratory','energy','keto','weight','menstrual','mood','minerals','tissue','grounding'];
 
   LABELS = {
     calm:'Calm & ease', sleep:'Restful sleep', immune:'Immune support',
-    respiratory:'Respiratory ease', energy:'Energy & focus', keto:'Clean fuel & satiety',
+    respiratory:'Respiratory ease', energy:'Energy & focus', keto:'Clean fuel & satiety', weight:'Weight & metabolism',
     menstrual:'Menstrual comfort', mood:'Mood lift', minerals:'Minerals & vitality',
     tissue:'Hair, skin & nails', grounding:'Grounding & presence',
     inflammation:'Inflammation', circulation:'Circulation',
@@ -572,6 +626,7 @@ class Component extends DCLogic {
     energy:['tired','fatigue','energy','sluggish','exhaust','wake','alert','productiv','slump','sleepy','drowsy','lethargic','stamina','endurance'],
     focus:['focus','memory','concentrat','foggy','brain fog','clarity','forget','sharp','mental','studying','study'],
     keto:['keto','mct','fasting','satiety','fuel','crash'],
+    weight:['weight','lose weight','weight loss','slim','metabolism','metabolic','cravings','appetite','curb'],
     calm:['stress','anxious','anxiety','calm','tense','tension','overwhelm','nervous','wound up','relax','unwind','panic','worri','frazzled','on edge','burnout','burn out','resilien','adrenal'],
     sleep:['sleep','insomnia','restless','wind down','bedtime','sleepless','toss','awake at night','mind off','switch off'],
     mood:['mood','heartbreak','heartbroken','grief','melanchol','lonely','spirits','cheer','depress','sad','low mood','tearful'],
@@ -590,7 +645,7 @@ class Component extends DCLogic {
     immune:{respiratory:0.6}, respiratory:{immune:0.5},
     calm:{sleep:0.5, grounding:0.5, mood:0.3, focus:0.2}, sleep:{calm:0.5},
     grounding:{calm:0.4}, mood:{calm:0.3},
-    energy:{keto:0.5, focus:0.4}, keto:{energy:0.5}, focus:{energy:0.4, calm:0.2},
+    energy:{keto:0.5, focus:0.4}, keto:{energy:0.5, weight:0.5}, weight:{keto:0.6, energy:0.3}, focus:{energy:0.4, calm:0.2},
     minerals:{tissue:0.5}, tissue:{minerals:0.4},
     inflammation:{circulation:0.3, minerals:0.2},
     circulation:{inflammation:0.3},
@@ -602,14 +657,14 @@ class Component extends DCLogic {
     { id:'laurelate-chai', category:'Signature', name:'Laurelate Chai', latin:'',
       ingredients:'bay nut · black tea · cinnamon · ginger · cardamom',
       desc:'An MCT-rich warming chai, sustained energy, satiety, and ketogenic endurance fuel, without the spike and crash.',
-      tags:{energy:3, keto:3}, benefits:['sustained energy without crash','ketogenic metabolic fuel','MCT satiety & endurance','warming digestive spice blend'],
-      why:{ energy:'Bay nut seeds are dense in medium-chain triglycerides (C10/C12) that bypass the carnitine shuttle and feed directly into mitochondrial beta-oxidation — converted to ketone bodies that fuel the brain independently of blood glucose. The result is steady output without the spike-and-crash of simple carbohydrates.', keto:'MCTs stimulate the HMGCS2 pathway in the liver to produce beta-hydroxybutyrate and acetoacetate — the same ketones produced by fasting. They also raise cholecystokinin (CCK), a satiety hormone, which is why this drink tends to hold you through a long morning without hunger.' } },
+      tags:{energy:3, keto:3, weight:2}, benefits:['sustained energy without crash','ketogenic metabolic fuel','MCT satiety & endurance','warming digestive spice blend'],
+      why:{ energy:'Bay nut seeds are dense in medium-chain triglycerides (C10/C12) that bypass the carnitine shuttle and feed directly into mitochondrial beta-oxidation — converted to ketone bodies that fuel the brain independently of blood glucose. The result is steady output without the spike-and-crash of simple carbohydrates.', keto:'MCTs stimulate the HMGCS2 pathway in the liver to produce beta-hydroxybutyrate and acetoacetate — the same ketones produced by fasting. They also raise cholecystokinin (CCK), a satiety hormone, which is why this drink tends to hold you through a long morning without hunger.', weight:'The bay-nut MCTs raise cholecystokinin (CCK), a natural fullness signal, and provide steady ketone energy in place of a blood-sugar spike — so many people feel satisfied for longer between meals. Best thought of as steady, satisfying fuel within a balanced routine, not a quick fix.' } },
 
     { id:'mct-coffee', category:'Signature', name:'MCT Coffee', latin:'',
       ingredients:'coffee · Laurelate bay-nut MCT',
       desc:'Clean fuel for sustained focus. Bay-nut MCTs reduce fatigue and support ketogenic endurance.',
-      tags:{energy:3, keto:3}, benefits:['sharp sustained mental focus','ketogenic endurance fuel','clean caffeine lift','reduced mid-morning crash'],
-      why:{ energy:'Caffeine blocks adenosine A1 and A2A receptors, delaying the brain\'s fatigue signaling. Bay nut MCTs extend this window by producing ketone bodies that provide parallel fuel — bridging the trough that often follows a caffeine peak and producing more even mental output than coffee alone.', keto:'MCTs take a direct route into hepatic mitochondria, bypassing the carnitine palmitoyltransferase-1 shuttle that long-chain fats require. This makes them reliably ketogenic — producing beta-hydroxybutyrate alongside coffee\'s alertness for endurance without a mid-morning energy dip.' } },
+      tags:{energy:3, keto:3, weight:2}, benefits:['sharp sustained mental focus','ketogenic endurance fuel','clean caffeine lift','reduced mid-morning crash'],
+      why:{ energy:'Caffeine blocks adenosine A1 and A2A receptors, delaying the brain\'s fatigue signaling. Bay nut MCTs extend this window by producing ketone bodies that provide parallel fuel — bridging the trough that often follows a caffeine peak and producing more even mental output than coffee alone.', keto:'MCTs take a direct route into hepatic mitochondria, bypassing the carnitine palmitoyltransferase-1 shuttle that long-chain fats require. This makes them reliably ketogenic — producing beta-hydroxybutyrate alongside coffee\'s alertness for endurance without a mid-morning energy dip.', weight:'Bay-nut MCTs convert to ketones for even, lasting energy and support a feeling of fullness, which can make it easier to move from morning into midday without a crash or cravings — a supportive habit alongside balanced eating and movement.' } },
 
     { id:'sipping-chocolate', category:'Signature', name:'Colombian Sipping Chocolate', latin:'Theobroma cacao',
       ingredients:'Theobroma cacao · Colombia',
@@ -822,6 +877,13 @@ class Component extends DCLogic {
   }
 
   onQuery = (e) => this.setState({ query: e.target.value, showNudge: false });
+  onNoteKey = (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (e.target && typeof e.target.value === 'string' && e.target.value !== this.state.query) this.setState({ query: e.target.value });
+      this.consult();
+    }
+  };
 
   toggle = (id) => this.setState(s => ({
     selected: s.selected.includes(id) ? s.selected.filter(x => x !== id) : [...s.selected, id],
@@ -859,9 +921,12 @@ class Component extends DCLogic {
       'Guest said: "' + q + '"' + chipLine,
       '',
       'Pick the single best primary drink and exactly two different alternates. Reply with ONLY a JSON object, no prose, no code fences:',
-      '{"primaryId":"<id>","alternateIds":["<id>","<id>"],"intent":"<a short lowercase noun phrase naming what they need so it reads naturally after the word For, e.g. pre-event nerves and sleeplessness; no leading verb>","why":"<1-2 sentences, warm and grounded, connecting their words to the primary plant>"}',
+      '{"primaryId":"<id>","alternateIds":["<id>","<id>"],"intent":"<a short lowercase noun phrase naming what THEY actually asked for, in their own terms, so it reads naturally after the word For, e.g. pre-event nerves and sleeplessness; no leading verb>","why":"<1-2 sentences, warm and grounded, connecting their words to the primary plant>"}',
       '',
-      'Rules: every id must be copied exactly from the menu. In "why", use only traditional / descriptive language (e.g. "traditionally used", "supports"), never medical, disease, treatment, or weight-loss claims, and no exclamation points. Botanical-literate but plain.'
+      'Rules: every id must be copied exactly from the menu.',
+      'For "intent", name what the guest actually asked for — do NOT swap their goal for a more flattering or sanitized one (e.g. if they ask about weight loss, do not relabel it as "energy and mood support").',
+      'If the guest asks for something the café does not offer (e.g. weight loss, or treating a medical condition), the "why" must briefly and plainly acknowledge that we do not offer that, then point them to the closest genuine comfort we do have — do not pretend their request was about something else.',
+      'In "why", use only traditional / descriptive language (e.g. "traditionally used", "supports"), never medical, disease, treatment, or weight-loss claims, and no exclamation points. Botanical-literate but plain.'
     ].join('\n');
   };
 
@@ -960,6 +1025,19 @@ class Component extends DCLogic {
   onAuthPassword = (e) => this.setState({ authPassword: e.target.value, authError:'' });
   authToggle = () => this.setState(s => ({ authMode: s.authMode === 'signin' ? 'signup' : 'signin', authError:'', authMsg:'' }));
 
+  resendConfirm = async () => {
+    const email = (this.state.authEmail || '').trim();
+    if (!email) { this.setState({ authError:'Enter your email above, then resend.' }); return; }
+    this.setState({ authBusy:true, authError:'' });
+    try {
+      const res = await this.api('auth', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'resend', email }) });
+      if (!res.ok || res.body.error) { this.setState({ authBusy:false, authError: res.body.error || 'Could not resend. Please try again.' }); return; }
+      this.setState({ authBusy:false, authMsg: res.body.message || 'Confirmation email sent again — check your inbox (and spam).' });
+    } catch (e) {
+      this.setState({ authBusy:false, authError:'Could not reach the server.' });
+    }
+  };
+
   authSubmit = async () => {
     const email = (this.state.authEmail || '').trim();
     const password = this.state.authPassword || '';
@@ -971,7 +1049,10 @@ class Component extends DCLogic {
       const res = await this.api('auth', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action, email, password }) });
       if (!res.ok || res.body.error) { this.setState({ authBusy:false, authError: res.body.error || 'Something went wrong. Please try again.' }); return; }
       const token = res.body.access_token;
-      if (!token) { this.setState({ authBusy:false, authMode:'signin', authPassword:'', authMsg: res.body.message || 'Check your email to confirm your account, then sign in.' }); return; }
+      if (!token) {
+        if (action === 'signin') { this.setState({ authBusy:false, authPassword:'', authError:'Incorrect email or password. Please try again.' }); return; }
+        this.setState({ authBusy:false, authMode:'signin', authPassword:'', authMsg: res.body.message || 'Check your email to confirm your account, then sign in.' }); return;
+      }
       try { window.localStorage.setItem('lrl_token', token); window.localStorage.setItem('lrl_email', email); } catch (e) {}
       this.setState({ token, account:{ email }, authBusy:false, authEmail:'', authPassword:'', authError:'', authMsg:'', recordsLoaded:false });
       this.loadRecords();
@@ -1066,10 +1147,15 @@ class Component extends DCLogic {
   backToList = () => { this.setState({ jView:'list', activeId:null, messages:[], showReminders:false }); this.loadConsults(); };
   newConsult = async () => {
     if (!this.state.token) return;
+    this.setState({ consultError:'' });
     try {
       const res = await this.api('consultations', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ title:'New consultation', kind:'acute' }) });
-      if (res.ok && res.body && res.body.id) { this.openConsult(res.body.id, 'New consultation')(); }
-    } catch (e) {}
+      if (res.status === 401) { this.signOut(); return; }
+      if (res.ok && res.body && res.body.id) { this.openConsult(res.body.id, 'New consultation')(); return; }
+      this.setState({ consultError: (res.body && res.body.error) ? res.body.error : "Couldn't start a consultation. Please try again." });
+    } catch (e) {
+      this.setState({ consultError: 'Could not reach the server. Please try again.' });
+    }
   };
 
   onChatInput = (e) => this.setState({ chatInput: e.target.value });
@@ -1092,6 +1178,25 @@ class Component extends DCLogic {
     this.setState(s => ({ messages: [...s.messages, temp], chatInput: '', chatBusy: true }));
     try {
       await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role: 'user', content: text }) });
+
+      // Scheduling intent → open the reminder setup instead of a wellness reply.
+      if (this.isSchedulingRequest(text)) {
+        const reply = "I can set that up. I've opened Reminders below — pick a time and whether it repeats, and we'll text you. (Add a mobile number there first if you haven't.)";
+        await this.api('messages', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ consultation_id: cid, role: 'apothecary', content: reply }) });
+        const res2 = await this.api('messages?consultation_id=' + cid, { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+        const guessed = this.guessTime(text);
+        const daily = /(every day|each day|each morning|every morning|daily|each night|every night)/i.test(text);
+        this.setState({
+          messages: (res2.ok && Array.isArray(res2.body)) ? res2.body : this.state.messages,
+          chatBusy:false, showReminders:true,
+          remMessage: 'Time for your tea from Laurelate.',
+          remTime: guessed || '09:00', remRepeat: daily ? 'daily' : 'once',
+          remSaved:false, remError:''
+        });
+        this.loadProfile(); this.loadReminders();
+        return;
+      }
+
       let reply = '';
       try {
         const p = this.state.profile || {};
@@ -1132,18 +1237,111 @@ class Component extends DCLogic {
   };
 
   // ---- reminders / SMS ----
-  toggleReminders = () => this.setState(s => ({ showReminders: !s.showReminders }));
+  toggleReminders = () => this.setState(s => {
+    const opening = !s.showReminders;
+    if (opening) { this.loadProfile(); this.loadReminders(); }
+    return { showReminders: opening, remSaved:false, remError:'' };
+  });
   onPhoneInput = (e) => this.setState({ phoneInput: e.target.value });
   savePhone = async () => {
     const phone = (this.state.phoneInput || '').trim();
     if (!phone || !this.state.token) return;
     try {
       const res = await this.api('profile', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ phone, sms_opt_in: true }) });
-      if (res.ok) this.setState({ profile: res.body, showReminders: false });
+      if (res.ok) this.setState({ profile: res.body, phoneInput: (res.body && res.body.phone) ? res.body.phone : phone });
     } catch (e) {}
+  };
+  hasPhoneOnFile = () => { const p = this.state.profile; return !!(p && p.phone && p.sms_opt_in); };
+
+  loadReminders = async () => {
+    if (!this.state.token) return;
+    this.setState({ remindersLoading:true });
+    try {
+      const res = await this.api('reminders', { method:'GET', headers:{ Authorization:'Bearer ' + this.state.token } });
+      if (res.status === 401) { this.signOut(); return; }
+      this.setState({ reminders: (res.ok && Array.isArray(res.body)) ? res.body : [], remindersLoading:false, remindersLoaded:true });
+    } catch (e) { this.setState({ remindersLoading:false, remindersLoaded:true }); }
+  };
+  onRemTime = (e) => this.setState({ remTime: e.target.value, remSaved:false });
+  onRemMessage = (e) => this.setState({ remMessage: e.target.value, remSaved:false });
+  toggleRemRepeat = () => this.setState(s => ({ remRepeat: s.remRepeat === 'daily' ? 'once' : 'daily', remSaved:false }));
+
+  // Next occurrence of a local HH:MM clock time, as a Date (today if still ahead, else tomorrow).
+  computeSendAt = (timeStr) => {
+    const parts = (timeStr || '09:00').split(':');
+    const hh = parseInt(parts[0], 10), mm = parseInt(parts[1], 10);
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), isNaN(hh) ? 9 : hh, isNaN(mm) ? 0 : mm, 0, 0);
+    if (d.getTime() <= now.getTime()) d.setDate(d.getDate() + 1);
+    return d;
+  };
+  saveReminder = async () => {
+    if (!this.state.token) return;
+    const msg = (this.state.remMessage || '').trim();
+    if (!msg) { this.setState({ remError:'Add a short reminder message.', remSaved:false }); return; }
+    if (!this.hasPhoneOnFile()) { this.setState({ remError:'Add a mobile number above first so we have somewhere to text.', remSaved:false }); return; }
+    const when = this.computeSendAt(this.state.remTime);
+    this.setState({ remBusy:true, remError:'', remSaved:false });
+    try {
+      const res = await this.api('reminders', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ send_at: when.toISOString(), message: msg, repeat: this.state.remRepeat }) });
+      if (res.status === 401) { this.signOut(); return; }
+      if (!res.ok || !res.body || !res.body.id) { this.setState({ remBusy:false, remError: (res.body && res.body.error) || 'Could not set the reminder.' }); return; }
+      this.setState({ remBusy:false, remSaved:true, remMessage:'', remindersLoaded:false });
+      this.loadReminders();
+    } catch (e) { this.setState({ remBusy:false, remError:'Could not reach the server.' }); }
+  };
+  deleteReminder = (id) => async () => {
+    if (!this.state.token) return;
+    this.setState(s => ({ reminders: s.reminders.filter(r => r.id !== id) }));
+    try { await this.api('reminders?id=' + id, { method:'DELETE', headers:this.authHeaders() }); } catch (e) {}
+  };
+  remindForPrimary = () => {
+    const r = this.state.result; const d = r ? this.byId(r.primaryId) : null;
+    const name = d ? d.name : 'tea';
+    const msg = 'Time for your ' + name + ' from Laurelate.';
+    if (!this.state.token) { this.setState({ view:'journal', remMessage: msg, remRepeat:'daily', remTime:'09:00' }); this.maybeLoadJournal(); return; }
+    this.setState({ view:'journal', jView:'list', drawerOpen:false, showReminders:true, remMessage: msg, remRepeat:'daily', remTime:'09:00', remSaved:false, remError:'' });
+    this.maybeLoadJournal(); this.loadProfile(); this.loadReminders();
+  };
+
+  // crude natural-language scheduling detector for the thread chat
+  isSchedulingRequest = (t) => {
+    const s = (t || '').toLowerCase();
+    const verb = /(remind|reminder|alarm|notify|text me|ping me|alert me)/.test(s);
+    const cadence = /(every day|each day|each morning|every morning|daily|each night|every night|tomorrow|at \d|\d\s*(am|pm)|\d:\d)/.test(s);
+    return verb && cadence;
+  };
+  guessTime = (t) => {
+    const s = (t || '').toLowerCase();
+    let m = s.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/);
+    if (m) {
+      let h = parseInt(m[1], 10); const mm = m[2];
+      if (m[3] === 'pm' && h < 12) h += 12; if (m[3] === 'am' && h === 12) h = 0;
+      return String(h).padStart(2, '0') + ':' + mm;
+    }
+    m = s.match(/\b(\d{1,2})\s*(am|pm)\b/);
+    if (m) {
+      let h = parseInt(m[1], 10);
+      if (m[2] === 'pm' && h < 12) h += 12; if (m[2] === 'am' && h === 12) h = 0;
+      return String(h).padStart(2, '0') + ':00';
+    }
+    return null;
   };
 
   // ---- save a café result into the journal as a new thread ----
+  // Build a journal title from what the guest actually wrote, not a relabeled
+  // category — falling back to the tapped concern chips, then the drink name.
+  titleFromInput = (r, d) => {
+    const q = (this.state.query || '').trim();
+    if (q) {
+      let t = q.replace(/\s+/g, ' ').replace(/[.,;:!?\s]+$/, '');
+      if (t.length > 60) t = t.slice(0, 57).replace(/\s+\S*$/, '') + '…';
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+    if (r && r.labelText) return r.labelText;
+    return d ? d.name : 'Consultation';
+  };
+
   saveRecord = async () => {
     const r = this.state.result;
     if (!r || !this.state.token) return;
@@ -1151,9 +1349,11 @@ class Component extends DCLogic {
     const inquiry = (this.state.query || '').trim() || ('Looking for ' + (r.labelText || 'support') + '.');
     const why = this.whyForResult(d, r);
     const rec = d ? (d.name + (why ? (' — ' + why) : '')) : (r.labelText || '');
+    const title = this.titleFromInput(r, d);
+    const summary = d ? ('Suggested ' + d.name) : '';
     this.setState({ saveBusy:true, saveError:'' });
     try {
-      const c = await this.api('consultations', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ title: r.labelText || (d ? d.name : 'Consultation'), kind:'acute', summary: d ? ('Suggested ' + d.name + ' for ' + (r.labelText || 'how you felt')) : '' }) });
+      const c = await this.api('consultations', { method:'POST', headers:this.authHeaders(), body: JSON.stringify({ title, kind:'acute', summary }) });
       if (c.status === 401) { this.setState({ saveBusy:false, saveError:'Your session expired — please sign in again.' }); return; }
       if (!c.ok || !c.body || !c.body.id) { this.setState({ saveBusy:false, saveError: (c.body && c.body.error) || 'Could not save.' }); return; }
       const cid = c.body.id;
@@ -1165,8 +1365,9 @@ class Component extends DCLogic {
 
   renderVals(){
     const { view, phase, query, selected, showNudge, result, account, token, savedFlag,
-            consults, consultsLoading, jView, activeId, activeTitle, messages, msgsLoading, chatInput, chatBusy,
-            profile, showReminders, phoneInput, medsInput, historyInput, accountBusy, accountSaved, deleteBusy,
+            consults, consultsLoading, consultError, jView, activeId, activeTitle, messages, msgsLoading, chatInput, chatBusy,
+            profile, showReminders, phoneInput, reminders, remTime, remRepeat, remMessage, remBusy, remError, remSaved,
+            medsInput, historyInput, accountBusy, accountSaved, deleteBusy,
             authEmail, authPassword, authMode, authError, authMsg, authBusy, saveBusy, saveError,
             cart, cartConfirmed } = this.state;
     const altCount = Math.max(0, Math.min(3, this.props.altCount ?? 2));
@@ -1237,6 +1438,22 @@ class Component extends DCLogic {
     const hasPhone = !!(profile && profile.phone);
     const phoneMasked = hasPhone ? ('•••• ' + String(profile.phone).slice(-4)) : '';
 
+    // Reminders list for display
+    const fmtWhen = (iso, repeat) => {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      if (repeat === 'daily') return 'Every day at ' + time;
+      const day = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+      return day + ' at ' + time;
+    };
+    const remindersView = (Array.isArray(reminders) ? reminders : []).map(r => ({
+      id: r.id,
+      message: r.message || '',
+      whenLabel: fmtWhen(r.send_at, r.repeat),
+      onDelete: this.deleteReminder(r.id)
+    }));
+
     // Drawer
     const drawerTransform = this.state.drawerOpen ? 'translateX(0)' : 'translateX(-100%)';
     const overlayOpacity = this.state.drawerOpen ? '1' : '0';
@@ -1257,6 +1474,7 @@ class Component extends DCLogic {
 
       note: query,
       onNote: this.onQuery,
+      onNoteKey: this.onNoteKey,
       chips, showNudge,
       onConsult: this.consult,
       onSurprise: this.surprise,
@@ -1280,6 +1498,8 @@ class Component extends DCLogic {
       hasConsults: consultsView.length > 0,
       noConsults: consultsView.length === 0 && !consultsLoading,
       consultsLoading,
+      consultError: consultError || '',
+      hasConsultError: !!consultError,
       activeTitle,
       messages: messagesView,
       hasMessages: messagesView.length > 0,
@@ -1294,10 +1514,21 @@ class Component extends DCLogic {
       showReminders, onToggleReminders: this.toggleReminders,
       hasPhone, phoneMasked, phoneInput,
       onPhoneInput: this.onPhoneInput, onSavePhone: this.savePhone,
+      remTime, remMessage,
+      onRemTime: this.onRemTime, onRemMessage: this.onRemMessage,
+      onToggleRemRepeat: this.toggleRemRepeat,
+      remRepeatLabel: remRepeat === 'daily' ? 'Every day' : 'Once',
+      onSaveReminder: this.saveReminder,
+      remSetLabel: remBusy ? 'Setting…' : 'Set reminder',
+      remSaved, remError, hasRemError: !!remError,
+      reminders: remindersView, hasReminders: remindersView.length > 0,
+      onRemindPrimary: this.remindForPrimary,
 
       authEmail, authPassword,
       authError, hasAuthError: !!authError,
       authMsg, hasAuthMsg: !!authMsg,
+      canResend: (!!authMsg || /confirm/i.test(authError || '')),
+      onResend: this.resendConfirm,
       authBusy,
       isSignup: authMode === 'signup',
       isSignin: authMode === 'signin',

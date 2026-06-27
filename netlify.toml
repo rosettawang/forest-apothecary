@@ -1,0 +1,7 @@
+# Netlify configuration for the Forest Apothecary app.
+# Kept minimal so it doesn't override existing build settings — only declares
+# the scheduled function. Functions live in the default dir (netlify/functions).
+
+# Run the SMS reminder sender every 15 minutes.
+[functions."send-reminders"]
+  schedule = "*/15 * * * *"
