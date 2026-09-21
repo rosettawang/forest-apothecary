@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="spec-status" content="open" />
+<meta name="spec-priority" content="60" />
+<meta name="spec-priority-why" content="Nothing is broken today - Netlify works. This is consolidation, so it waits behind the domain move and behind anything actually failing." />
+<meta name="spec-blocker" content="NOT STARTED. Nothing blocks the code work: all ten handlers, the blob usage and the cron are readable in this repo and the port can be written and tested without a single credential. TWO THINGS NEED ROSETTA, and neither blocks building. (1) NINE SECRET VALUES, which only she can read out of the dashboards: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, LOGS_SECRET, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM. Running wrangler secret put is not hers; reading the values is. Account step: see Login pass. (2) THE CUTOVER ITSELF, because this app holds real accounts and personal wellness journals and the reminder job sends real SMS to real phone numbers. See the double-send warning." />
+<meta name="spec-needs" content="apothecary-domain-move" />
+<meta name="spec-touches" content="netlify/functions,netlify.toml,package.json,index.html" />
+<meta name="spec-verify" content="test -f wrangler.jsonc &amp;&amp; test -f src/worker.js &amp;&amp; ! grep -rq '@netlify/blobs' package.json" />
+<meta name="spec-decision" content="One Worker with a router, or ten Workers? Recommended: ONE, with a path router. Workers has no one-file-per-endpoint convention the way Netlify Functions does, and ten Workers would mean ten deploys, ten secret sets and ten dashboard entries for what is one app. The cost is that a syntax error takes all ten endpoints down instead of one, which is what the build step is for. Cheap to reverse early, expensive later. Does not block." />
+<meta name="spec-decision" content="Keep the /.netlify/functions/ URL shape, or move to /api/? Recommended: KEEP IT, at least through cutover. index.html reaches the backend through exactly two strings - a base at line 1015 and one hardcoded chat path at line 956 - so either choice is a small edit, BUT index.html is a generated artifact (see the support.js risk) and not editing it at all is worth more than a tidy URL. Rename in a later pass once the Worker is proven. Does not block." />
+<meta name="spec-decision" content="Netlify Blobs replacement: KV or R2? Recommended: KV. The store is used in exactly two places for one purpose - chat.js writes a query log under a timestamp-plus-random key with setJSON, get-logs.js reads them back - which is a key-value store with small JSON values and no listing requirements beyond a prefix scan. R2 would be object storage for something that is not objects. Does not block." />
+<title>Taking the Apothecary off Netlify and onto Cloudflare</title>
+<link rel="stylesheet" href="spec.css" />
+</head>
+<body>
+
+<div class="internal">Internal planning document — <b>not part of the app</b> · never deploy <code>specs/</code></div>
+
+<div class="wrap" id="top">
+
+<h1>Taking the Apothecary off Netlify and onto Cloudflare</h1>
+<p class="meta">Status: open · derived Sep 21, 2026 by reading every function in this repo</p>
+<p class="lede">Goal: this app runs entirely on the Cloudflare account that already hosts <code>laurelate-website</code> and <code>iceland-doc</code> — one dashboard, one bill, one place to look when something breaks — with Supabase still doing the data and nothing about the app's behaviour changing.</p>
+
+<div class="callout">
+  <h4>Nothing is broken. This is consolidation, and it is optional.</h4>
+  <p>
+    Netlify works. The honest reason to do this is that two hosting accounts is one more than necessary and
+    the Cloudflare side is already familiar. The honest reason not to is that the app holds
+    <strong>real accounts and personal wellness journals</strong>, and <code>auth</code> and
+    <code>delete-account</code> are not code to break casually. If it never gets done, nothing bad happens.
+  </p>
+</div>
+
+<h2 id="what">What is actually on Netlify</h2>
+<p class="meta">Derived Sep 21, 2026 from this repo. Re-derive before building — these are the claims most likely to have moved.</p>
+<table>
+  <tr><th>Piece</th><th>Detail</th><th>Portability</th></tr>
+  <tr>
+    <td>Static front end</td>
+    <td><code>index.html</code> (138,662 B), <code>support.js</code>, <code>assets/</code> (10 files)</td>
+    <td><strong>Easy.</strong> Workers static assets, exactly the binding <code>laurelate-website</code> already uses.</td>
+  </tr>
+  <tr>
+    <td>Ten functions</td>
+    <td>
+      <code>auth</code>, <code>chat</code>, <code>consultations</code>, <code>delete-account</code>,
+      <code>get-logs</code>, <code>messages</code>, <code>profile</code>, <code>reminders</code>,
+      <code>send-reminders</code>, <code>wellness-chat</code>
+    </td>
+    <td><strong>A real port.</strong> See below — they are v1 handlers, not v2.</td>
+  </tr>
+  <tr>
+    <td>Netlify Blobs</td>
+    <td><code>getStore('queries')</code> in <code>chat.js</code>; read back in <code>get-logs.js</code></td>
+    <td><strong>Two call sites only.</strong> Maps to KV.</td>
+  </tr>
+  <tr>
+    <td>Scheduled function</td>
+    <td><code>send-reminders</code> on <code>*/15 * * * *</code>, declared in <code>netlify.toml</code></td>
+    <td><strong>Easy</strong> as config, <strong>dangerous</strong> at cutover. See the double-send warning.</td>
+  </tr>
+  <tr>
+    <td>Supabase</td>
+    <td>Postgres + auth, schema snapshot in <code>supabase-schema.sql</code></td>
+    <td><strong>Unchanged.</strong> External to both hosts; nothing to migrate.</td>
+  </tr>
+  <tr>
+    <td>Twilio</td>
+    <td>SMS, called only from <code>send-reminders</code></td>
+    <td><strong>Unchanged.</strong> Plain HTTPS API.</td>
+  </tr>
+</table>
+
+<h2 id="port">Why the functions are a port and not a rename</h2>
+<p>
+  <strong>All ten are Netlify Functions v1.</strong> Every one is
+  <code>exports.handler = async (event) =&gt; ({ statusCode, headers, body })</code> — CommonJS, an
+  <code>event</code> object in, a plain object out. Workers want
+  <code>export default { async fetch(request, env, ctx) }</code> returning a real <code>Response</code>.
+  Had they been v2 (<code>export default async (req, context)</code>) this would have been close to a
+  no-op. They are not.
+</p>
+<table>
+  <tr><th>Netlify v1</th><th>Worker</th></tr>
+  <tr><td><code>exports.handler = async (event)</code></td><td><code>export default { async fetch(request, env) }</code></td></tr>
+  <tr><td><code>event.httpMethod</code></td><td><code>request.method</code></td></tr>
+  <tr><td><code>event.body</code> (string)</td><td><code>await request.text()</code> / <code>.json()</code></td></tr>
+  <tr><td><code>event.headers.authorization</code></td><td><code>request.headers.get('authorization')</code></td></tr>
+  <tr><td><code>return { statusCode, headers, body }</code></td><td><code>return new Response(body, { status, headers })</code></td></tr>
+  <tr><td><code>process.env.X</code></td><td><code>env.X</code> — the binding, not the global</td></tr>
+</table>
+<p>
+  <strong>One function needs more than mechanical translation.</strong> <code>auth.js</code> opens with
+  <code>require('https')</code> and talks to Supabase through Node's <code>https.request</code>, sizing the
+  body with <code>Buffer.byteLength</code>. <code>nodejs_compat</code> would probably carry it, but the
+  right move is to rewrite that helper as one <code>fetch</code> call — it is calling a REST API, the
+  rewrite is shorter than the original, and it removes the only Node-API dependency in the app. Check the
+  others for the same pattern rather than assuming <code>auth.js</code> is alone in it.
+</p>
+
+<div class="callout warn">
+  <h4>The reminder job can double-send SMS to real people</h4>
+  <p>
+    <code>send-reminders</code> runs every fifteen minutes and sends text messages through Twilio. If the
+    Netlify schedule and a Cloudflare Cron Trigger are ever both live, <strong>every reminder goes out
+    twice</strong> — to real phone numbers, with no way to recall them.
+  </p>
+  <p>
+    <strong>So: never have both enabled.</strong> Comment the <code>[functions."send-reminders"]</code>
+    block out of <code>netlify.toml</code> and redeploy Netlify <em>before</em> adding the Cloudflare cron,
+    and treat that as its own step with its own verification rather than a detail inside a larger one.
+    Everything else in this migration is reversible; this is the part that reaches strangers' phones.
+  </p>
+</div>
+
+<h2 id="order">Build order</h2>
+<ol>
+  <li>
+    <strong>Scaffold, without touching Netlify.</strong> <code>wrangler.jsonc</code> with a static-assets
+    binding for the repo root, plus <code>src/worker.js</code> holding a path router. Deploy it to a
+    <code>workers.dev</code> URL. Nothing about Netlify changes, so there is no risk in this step.
+  </li>
+  <li>
+    <strong>Port the seven plain functions first</strong> — <code>consultations</code>,
+    <code>messages</code>, <code>profile</code>, <code>reminders</code>, <code>wellness-chat</code>,
+    <code>chat</code>, <code>get-logs</code>. They only need env vars and outbound <code>fetch</code>, so
+    they are the cheapest place to find out whether the router shape is right.
+  </li>
+  <li>
+    <strong>Then <code>auth</code> and <code>delete-account</code>.</strong> Deliberately later: these two
+    hold the account lifecycle, and <code>delete-account</code> is the only handler that uses
+    <code>SUPABASE_SERVICE_ROLE_KEY</code> to do something irreversible. Exercise both against a throwaway
+    account, not a real one.
+  </li>
+  <li>
+    <strong>Replace Blobs with KV.</strong> Two call sites. <code>store.setJSON(key, value)</code> becomes
+    <code>env.QUERIES.put(key, JSON.stringify(value))</code>; the read in <code>get-logs</code> becomes a
+    prefix <code>list</code> plus <code>get</code>. The existing keys are
+    <code>&lt;epoch-ms&gt;-&lt;random&gt;</code>, which sort usefully, so keep that shape.
+    <p class="meta">
+      Existing blob contents are query logs, not user data. Decide whether to export them or start the KV
+      namespace empty — starting empty is defensible and saves a migration script.
+    </p>
+  </li>
+  <li>
+    <strong>Set the secrets.</strong> <code>npx wrangler secret put &lt;NAME&gt;</code> for each of the nine.
+    Running the command is not a Login pass item; reading the value out of Supabase, Anthropic or Twilio is.
+  </li>
+  <li>
+    <strong>Prove it on <code>workers.dev</code>, not locally.</strong> Sign up a throwaway account, write a
+    journal entry, run a consultation, set a reminder, delete the account. Every integration is configured
+    separately in production and a green local run proves none of them.
+  </li>
+  <li>
+    <strong>Kill the Netlify cron, then add the Cloudflare one.</strong> In that order, per the warning above.
+  </li>
+  <li>
+    <strong>Cut the domain over.</strong> Point <code>apothecary.rosettawang.org</code> at the Worker
+    instead of Netlify — a Worker custom domain rather than a CNAME, so Cloudflare handles the certificate.
+    Keep the Netlify site alive and unrouted for a week as a rollback, then delete it.
+  </li>
+</ol>
+
+<h2 id="frontend">The front end may not need editing at all</h2>
+<p>
+  <code>index.html</code> reaches the backend through <strong>exactly two strings</strong>: a base at line
+  1015, <code>fetch('/.netlify/functions/' + path, opts)</code>, and one hardcoded
+  <code>'/.netlify/functions/chat'</code> at line 956. Verified Sep 21, 2026.
+</p>
+<p>
+  So if the Worker simply <strong>routes <code>/.netlify/functions/*</code> itself</strong>, the front end
+  needs no change whatsoever. The path looks odd on a host that has nothing to do with Netlify, and it can
+  be renamed later — but a cutover that does not touch <code>index.html</code> is worth more than a tidy
+  URL, for the reason in the next section.
+</p>
+
+<div class="callout">
+  <h4>Risk worth knowing before anyone edits the front end</h4>
+  <p>
+    <code>support.js</code> opens with
+    <em>&ldquo;GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with
+    <code>cd dc-runtime &amp;&amp; bun run build</code>&rdquo;</em>, and
+    <strong><code>dc-runtime/</code> is not in this repo.</strong> <code>index.html</code> loads it with
+    <code>&lt;script src="./support.js"&gt;</code>.
+  </p>
+  <p>
+    So a build artifact is checked in whose source is somewhere else — and if the front end ever needs
+    rebuilding rather than patching, that source has to be found first. Not a blocker for this migration,
+    which is why it is a note rather than a step, but it is the reason step 8 avoids touching
+    <code>index.html</code>.
+  </p>
+</div>
+
+<h2 id="done">Done when</h2>
+<ol>
+  <li><code>apothecary.rosettawang.org</code> is served by a Cloudflare Worker, with all ten endpoints answering.</li>
+  <li>A throwaway account can sign up, journal, consult, set a reminder and delete itself.</li>
+  <li>One reminder job runs, on Cloudflare, and Netlify's is off — confirmed by a single SMS rather than two.</li>
+  <li>The Netlify site is deleted, and <code>@netlify/blobs</code> and <code>@netlify/functions</code> are out of <code>package.json</code>.</li>
+</ol>
+
+</div>
+</body>
+</html>

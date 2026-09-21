@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="spec-status" content="blocked" />
+<meta name="spec-priority" content="10" />
+<meta name="spec-priority-why" content="The new hostname already resolves and serves a certificate error, so the longer this sits half-done the longer a broken URL exists that someone could be given." />
+<meta name="spec-blocker" content="ONE STEP, AND IT IS ROSETTA&apos;S. Netlify must be told the new hostname before the old one is deleted, and that needs a Netlify login - the app.netlify.com session is not signed in, and the &quot;Log in with GitHub&quot; route is an OAuth grant, so it is a Login pass item rather than something Claude can do. In Netlify, open the gorgeous-moxie-b6f8eb site, then Domain management, then Add a domain, and add apothecary.rosettawang.org. DNS is already pointing at Netlify (added Sep 21, 2026) so verification should be immediate and the certificate usually lands within minutes. Everything either side of that click is done or ready." />
+<meta name="spec-touches" content="none" />
+<meta name="spec-touches-why" content="Nothing in this repo changes. The work is two DNS records in Cloudflare and one custom-domain entry in Netlify." />
+<meta name="spec-verify" content="test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecary.rosettawang.org) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://tea.laurelate.com) = 000" />
+<title>Moving the Apothecary off tea.laurelate.com</title>
+<link rel="stylesheet" href="spec.css" />
+</head>
+<body>
+
+<div class="internal">Internal planning document — <b>not part of the app</b> · never deploy <code>specs/</code></div>
+
+<div class="wrap" id="top">
+
+<h1>Moving the Apothecary off tea.laurelate.com</h1>
+<p class="meta">Status: blocked on one Netlify click · derived Sep 21, 2026 against live DNS and the Netlify origin</p>
+<p class="lede">Goal: this app answers on <strong>apothecary.rosettawang.org</strong> and <strong>tea.laurelate.com</strong> stops existing. Rosetta asked for a clean break — no redirect — so old links will simply fail to resolve.</p>
+
+<div class="callout">
+  <h4>Order matters, and getting it wrong takes the app offline</h4>
+  <p>
+    Netlify routes by <strong>Host header</strong>. Proved Sep 21, 2026 by sending each Host to
+    Netlify's IP directly: <code>Host: apothecary.rosettawang.org</code> returns
+    <strong>404 Not Found</strong>, while <code>Host: gorgeous-moxie-b6f8eb.netlify.app</code> returns 301.
+    So until Netlify is told the new name, it will not serve it — and deleting <code>tea</code> first would
+    leave the app reachable at neither name.
+  </p>
+</div>
+
+<h2 id="state">Where it stands</h2>
+<table>
+  <tr><th>Step</th><th>State</th></tr>
+  <tr>
+    <td><code>apothecary</code> CNAME on the <code>rosettawang.org</code> zone</td>
+    <td>
+      <strong>Done Sep 21, 2026.</strong> CNAME → <code>gorgeous-moxie-b6f8eb.netlify.app</code>,
+      <strong>DNS only</strong>. Resolves to <code>52.52.192.191</code> / <code>13.52.188.95</code> via 1.1.1.1.
+      Proxying was left off deliberately: Netlify issues its own certificate, and an orange cloud in front
+      of it breaks that validation.
+    </td>
+  </tr>
+  <tr>
+    <td>Netlify custom domain</td>
+    <td>
+      <strong>Not done — this is the blocker.</strong> The certificate served for the new hostname is
+      <code>CN=*.netlify.app</code>, Netlify's generic wildcard, which does not cover
+      <code>apothecary.rosettawang.org</code>. A browser opening it today gets a certificate warning.
+    </td>
+  </tr>
+  <tr>
+    <td>Delete <code>tea</code> from the <code>laurelate.com</code> zone</td>
+    <td><strong>Not done, and deliberately last.</strong> <code>tea.laurelate.com</code> still returns 200 and is untouched.</td>
+  </tr>
+</table>
+
+<h2 id="do">What to do, in this order</h2>
+<ol>
+  <li>
+    <strong>Rosetta:</strong> add <code>apothecary.rosettawang.org</code> in Netlify — the
+    <code>gorgeous-moxie-b6f8eb</code> site, Domain management, Add a domain.
+  </li>
+  <li>
+    <strong>Check the certificate actually covers the new name</strong>, not just that the page loads.
+    This is the step that tells you Netlify really accepted the domain:
+    <pre><code>echo | openssl s_client -connect apothecary.rosettawang.org:443 \
+  -servername apothecary.rosettawang.org 2>/dev/null | openssl x509 -noout -subject</code></pre>
+    <p class="meta">
+      It must name <code>apothecary.rosettawang.org</code>. While it still says
+      <code>CN=*.netlify.app</code>, Netlify has not finished.
+    </p>
+  </li>
+  <li>
+    <strong>Confirm the app renders</strong>, not just that something answers:
+    <pre><code>curl -sL https://apothecary.rosettawang.org/ | grep -o '&lt;title&gt;[^&lt;]*&lt;/title&gt;'</code></pre>
+    <p class="meta">Expect <code>&lt;title&gt;Laurelate journal&lt;/title&gt;</code>.</p>
+  </li>
+  <li>
+    <strong>Then delete the <code>tea</code> CNAME</strong> from the <code>laurelate.com</code> zone.
+    22 of 200 records were in use on Sep 21, 2026; it is the CNAME pointing at
+    <code>gorgeous-moxie-b6f8eb.netlify.app</code>.
+  </li>
+  <li>
+    <strong>Remove <code>tea.laurelate.com</code> from Netlify too</strong>, or it sits in that site's domain
+    list claiming a hostname that no longer resolves — which is the sort of thing that confuses the next
+    person to open the dashboard.
+  </li>
+</ol>
+
+<h2 id="clean">What a clean break costs</h2>
+<p>
+  Rosetta chose this over a redirect, and it is the simpler end state. The cost, recorded so it is not a
+  surprise later: <strong>every existing link, bookmark and QR code pointing at
+  <code>tea.laurelate.com</code> stops working</strong>, with a DNS failure rather than a friendly page.
+  Worth a thought about whether that URL was ever printed on anything, or sent to anyone who uses the
+  journal — the app holds accounts, so some people may have it saved.
+</p>
+<p class="meta">
+  If that turns out to matter, the reversal is cheap while the record still exists: keep <code>tea</code>,
+  turn the proxy on, and add a Cloudflare redirect rule to the new host. That option disappears once the
+  record is deleted, which is the one argument for deciding now rather than later.
+</p>
+
+</div>
+</body>
+</html>

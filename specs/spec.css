@@ -1,0 +1,218 @@
+/* ============================================================
+   Laurelate internal spec sheets — shared style
+   INTERNAL ONLY. specs/ is never deployed; see specs/index.html.
+   Brand tokens mirror ARCHITECTURE.md §6 / app/globals.css so specs
+   read like the site. Structure deliberately mirrors the whrfund.org
+   specs system, so the two repos stay recognisably the same thing.
+   ============================================================ */
+
+:root{
+  --bg:#FFFBF5;            /* Web White */
+  --card:#FFF;
+  --ink:#191514;           /* Web Black */
+  --border:#E8DFD2;
+  --deep-laurel:#512D20;   /* primary dark — headings, grounds */
+  --laurel-leaf:#798D4C;   /* green — meta, secondary text */
+  --wild-laurel:#BAC364;   /* bright green — tags */
+  --bright-sage:#E2E8AB;
+  --yarrow:#FFF8E2;        /* warm panel */
+  --berry:#6A1744;         /* Ripe Laurel — accents, warnings */
+  --nut-coco:#BC8057;
+  --sea-breeze:#BBC8DC;
+  --maize:#FDF1B5;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:400 17px/1.6 'IBM Plex Sans',system-ui,sans-serif;}
+.wrap{max-width:900px;margin:0 auto;padding:2.5rem 1.25rem 5rem}
+h1,h2,h3{font-family:Stoke,Georgia,serif;line-height:1.2}
+h1{font-size:2.1rem;font-weight:400;margin:0 0 .35rem;color:var(--deep-laurel)}
+h2{font-size:1.5rem;font-weight:400;margin:2.75rem 0 .75rem;color:var(--deep-laurel);
+  border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{font-size:1.15rem;font-weight:400;margin:1.75rem 0 .5rem;color:var(--deep-laurel)}
+p,li{max-width:68ch}
+a{color:var(--berry)}
+code{font-family:var(--mono);font-size:.88em;background:var(--yarrow);
+  padding:.1em .35em;border-radius:3px}
+pre{background:var(--deep-laurel);color:var(--yarrow);padding:1rem 1.1rem;border-radius:6px;
+  overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.93rem}
+th,td{border:1px solid var(--border);padding:.5rem .65rem;text-align:left;vertical-align:top}
+th{background:var(--yarrow);font-weight:600}
+.lede{font-size:1.05rem;color:var(--laurel-leaf)}
+.meta{font-family:var(--mono);font-size:.78rem;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--laurel-leaf);margin:0 0 1.5rem}
+.callout{border-left:4px solid var(--wild-laurel);background:#fff;padding:1rem 1.25rem;
+  border-radius:0 6px 6px 0;margin:1.25rem 0}
+.callout.warn{border-left-color:var(--berry)}
+.callout.ask{border-left-color:var(--nut-coco)}
+.callout.note{border-left-color:var(--sea-breeze)}
+.callout h4{margin:0 0 .4rem;font-family:'IBM Plex Sans',sans-serif;font-size:.8rem;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--laurel-leaf)}
+.callout.warn h4{color:var(--berry)}
+.callout p:last-child{margin-bottom:0}
+blockquote{margin:1rem 0;padding:.75rem 1.25rem;border-left:3px solid var(--border);
+  color:var(--laurel-leaf)}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.06em;padding:.15em .55em;border-radius:3px;vertical-align:middle}
+.tag-open{background:var(--wild-laurel);color:var(--deep-laurel)}
+.tag-blocked{background:var(--nut-coco);color:#2E1810}
+.tag-done{background:var(--border);color:var(--laurel-leaf)}
+.tag-canonical{background:var(--berry);color:var(--yarrow)}
+
+/* internal-only banner — every spec carries it */
+.internal{background:var(--deep-laurel);color:var(--yarrow);font-family:var(--mono);
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;
+  padding:.55rem 1.25rem;text-align:center}
+.internal b{color:var(--wild-laurel)}
+
+/* draft copy block (proposed site wording) */
+.copy{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem 1.75rem;margin:1.25rem 0}
+.copy h3:first-child{margin-top:0}
+
+/* completed-work log (written by npm run specs:prune) */
+.spec-done-list li{margin-bottom:.6rem}
+.spec-done-list .when{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--laurel-leaf);background:var(--yarrow);
+  padding:.15em .5em;border-radius:3px;white-space:nowrap}
+
+/* index listing */
+.spec-list{list-style:none;padding:0;margin:1rem 0}
+.spec-list li{background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:1rem 1.15rem;margin-bottom:.75rem;max-width:none}
+.spec-list a{font-weight:600;text-decoration:none;font-size:1.05rem}
+.spec-list a:hover{text-decoration:underline}
+.spec-list p{margin:.35rem 0 0;font-size:.93rem;color:var(--laurel-leaf)}
+
+/* why a spec is blocked / what remains — written into the index by specs:prune
+   from each spec's <meta name="spec-blocker"> */
+.spec-list .blocker{
+  margin:.55rem 0 0;
+  padding:.6rem .8rem;
+  background:var(--yarrow);
+  border-left:3px solid var(--nut-coco);
+  border-radius:0 4px 4px 0;
+  font-size:.9rem;
+  color:var(--ink);
+}
+.spec-list .blocker strong{color:var(--berry)}
+
+/* ============================================================
+   Collapsible reference sections
+   Evergreen "how this works" material folds away, so what you see
+   first is current state and what to do next. Native <details>:
+   no JavaScript, works opened straight from disk, keyboard
+   accessible, and Cmd/Ctrl+F still finds text inside a closed one
+   in Chrome. Convention: conventions and procedure collapse;
+   status, queues and anything actionable stays open.
+   ============================================================ */
+details.fold {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  margin: 1.5rem 0;
+}
+details.fold > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: .55rem;
+  padding: .75rem 1.1rem;
+  font-family: Stoke, Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--deep-laurel);
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before {
+  content: "▸";
+  font-family: var(--mono);
+  font-size: .85em;
+  color: var(--laurel-leaf);
+}
+details.fold[open] > summary::before { content: "▾"; }
+details.fold > summary:hover { color: var(--berry); }
+details.fold > summary:focus-visible { outline: 2px solid var(--berry); outline-offset: 2px; }
+/* the "what's in here" hint, right-aligned in the summary row */
+details.fold > summary .hint {
+  margin-left: auto;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 400;
+  color: var(--laurel-leaf);
+  text-align: right;
+}
+details.fold > .body { padding: 0 1.1rem 1.1rem; }
+details.fold > .body > :first-child { margin-top: 0 }
+/* headings inside a fold shouldn't compete with the summary */
+details.fold h3 { font-size: 1.02rem; margin-top: 1.25rem }
+details.fold h2 {
+  font-size: 1.02rem; border-bottom: 0; margin: 1.25rem 0 .5rem; padding-bottom: 0;
+}
+
+/* ---- Section jump-nav at the top of the index ---- */
+.index-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+  margin: 1.5rem -1.25rem 2rem;
+  padding: .7rem 1.25rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.index-nav a {
+  font-size: .85rem;
+  text-decoration: none;
+  color: var(--berry);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .3rem .9rem;
+}
+.index-nav a:hover { border-color: var(--laurel-leaf); color: var(--deep-laurel) }
+.index-nav a:focus-visible { outline: 2px solid var(--berry); outline-offset: 2px }
+.index-nav a.to-top { margin-left: auto; color: var(--laurel-leaf) }
+/* Set by spec-nav.js, which is optional — without it the bar is still sticky
+   and the links still jump, you just do not get the highlight. */
+.index-nav a.active {
+  border-color: var(--laurel-leaf);
+  background: var(--yarrow);
+  color: var(--deep-laurel);
+  font-weight: 600;
+}
+/* A sticky bar covers whatever an anchor jumps to unless the target reserves
+   room for it. Without this, clicking a nav link lands the heading underneath
+   the nav and the page looks like it jumped to the wrong place. */
+.wrap :is(h1, h2, h3)[id] { scroll-margin-top: 4.5rem }
+@media (max-width: 620px) {
+  .index-nav { gap: .35rem; padding: .55rem 1.25rem }
+  .index-nav a { font-size: .78rem; padding: .25rem .7rem }
+  /* auto-margin would push Top onto a row of its own once the links wrap,
+     costing a line of the viewport on exactly the screens with least to spare */
+  .index-nav a.to-top { margin-left: 0 }
+}
+
+/* ---- Decisions waiting on Rosetta (written by specs:prune) ----
+   One card per spec, one bullet per spec-decision meta. Nut Coco rather than
+   the berry used for blockers: a decision is a question, not a failure. */
+.spec-decision-list{list-style:none;padding:0;margin:1rem 0}
+.spec-decision-list > li{background:var(--card);border:1px solid var(--border);
+  border-left:4px solid var(--nut-coco);border-radius:0 6px 6px 0;
+  padding:1rem 1.15rem;margin-bottom:.75rem;max-width:none}
+.spec-decision-list > li > a{font-weight:600;text-decoration:none;font-size:1.05rem}
+.spec-decision-list > li > a:hover{text-decoration:underline}
+.spec-decision-list ul{margin:.5rem 0 0;padding-left:1.15rem}
+.spec-decision-list ul li{font-size:.93rem;margin-bottom:.5rem;max-width:68ch}
+.spec-decision-list ul li:last-child{margin-bottom:0}
+
+/* ---- Derived execution order (written by specs:plan --write) ---- */
+.spec-order li{margin-bottom:.6rem}
+.spec-order a{font-weight:600}
