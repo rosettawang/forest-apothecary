@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="spec-status" content="open" />
+<meta name="spec-priority" content="20" />
+<meta name="spec-priority-why" content="Nothing here is urgent in the way a broken URL is urgent, but the sequencing is load-bearing: link-building and indexing done before the domain move is thrown away, and Stripe written for Netlify Functions is rewritten for Cloudflare Workers. Both wasted efforts are avoidable by doing this after the two migration specs and not before." />
+<meta name="spec-decision" content="Four decisions are Rosetta's and block the build: (1) hosted Stripe Checkout vs custom Payment Element - recommendation is hosted; (2) Laurelate's existing Stripe account vs a new Forest Apothecary account - the statement descriptor is the deciding factor; (3) whether a shippable product shares the existing pickup cart or gets a separate flow; (4) natural preservative system vs phenoxyethanol for the lotion." />
+<meta name="spec-needs" content="Jar capacity and material from the Temu listing (login wall - Claude could not read it). Stripe publishable and secret keys set as environment variables by Rosetta, never pasted into chat or committed. Sales-tax nexus states. Shipping origin address and carrier choice." />
+<meta name="spec-touches" content="index.html, netlify/functions/ (or the Workers equivalent), package.json, a new product-page build step, and new robots.txt + sitemap.xml at the site root." />
+<meta name="spec-touches-why" content="Product SEO cannot be done inside the current single-file client-rendered app, so this necessarily adds a build step and real URLs rather than editing copy in place." />
+<meta name="spec-verify" content="curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q '&lt;title&gt;' &amp;&amp; curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q 'application/ld+json' &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} https://apothecary.rosettawang.org/sitemap.xml) = 200" />
+<title>Selling the Thanaka Aftershave — SEO and Stripe</title>
+<link rel="stylesheet" href="spec.css" />
+</head>
+<body>
+
+<div class="internal">Internal planning document — <b>not part of the app</b> · never deploy <code>specs/</code></div>
+
+<div class="wrap" id="top">
+
+<h1>Selling the Thanaka Aftershave</h1>
+<p class="meta">Status: open, four decisions outstanding · audited Sep 21, 2026 against the repo at <code>1058034</code></p>
+<p class="lede">Goal: a stranger searching for a razor-bump remedy finds the Thanaka Aftershave, reads a page that loads without JavaScript, and pays with a card. Today none of those three things is possible, for reasons that are architectural rather than cosmetic.</p>
+
+<div class="callout warn">
+  <h4>The site cannot currently rank for anything at all</h4>
+  <p>
+    <code>index.html</code> has <strong>no <code>&lt;title&gt;</code> element</strong>. The document head is
+    <code>charset</code>, <code>viewport</code>, and a <code>&lt;script&gt;</code> tag — nothing else. The two
+    <code>&lt;title&gt;</code> matches in the file are inside JavaScript string literals at lines 1126 and 1235
+    that build exported journal pages, not the document. There is likewise no meta description, no
+    Open Graph tags, no JSON-LD, no <code>robots.txt</code> and no <code>sitemap.xml</code>.
+  </p>
+  <p>
+    This is not a ranking disadvantage. It means Google has no headline to display for the site
+    in a result, and the single greatest asset the Apothecary has — the mechanism writing in the
+    <code>why</code> fields, which is genuinely better than what competitors publish — is invisible to
+    every crawler on the internet.
+  </p>
+</div>
+
+<h2 id="state">What the audit found</h2>
+<table>
+  <tr><th>Thing</th><th>State</th></tr>
+  <tr>
+    <td>Document title and meta description</td>
+    <td><strong>Absent.</strong> See the callout above.</td>
+  </tr>
+  <tr>
+    <td>Per-product URLs</td>
+    <td>
+      <strong>None.</strong> There is no router — no <code>pushState</code>, no <code>location.pathname</code>
+      handling. All 16 menu items live in the <code>DRINKS</code> array at <code>index.html:610</code> and render
+      client-side into one URL. A product cannot rank without a URL that is <em>about</em> that product.
+    </td>
+  </tr>
+  <tr>
+    <td>Server-rendered content</td>
+    <td>
+      <strong>None.</strong> The page ships an empty <code>&lt;x-dc&gt;</code> shell and builds itself from
+      <code>support.js</code>. Google will execute JavaScript eventually, but it defers rendering, and every
+      other crawler — Bing, the AI answer engines, and the link preview unfurlers on every social
+      platform — largely will not.
+    </td>
+  </tr>
+  <tr>
+    <td>Payments</td>
+    <td>
+      <strong>None.</strong> <code>index.html:345</code> reads <em>"show this screen at the counter for pickup.
+      Payment is taken in person."</em> There is no Stripe code anywhere in the repo, no shipping
+      concept, no tax handling, and no record of a paid order.
+    </td>
+  </tr>
+  <tr>
+    <td>Backend</td>
+    <td>
+      Nine Netlify Functions (<code>auth</code>, <code>chat</code>, <code>consultations</code>, <code>profile</code>,
+      <code>reminders</code>, and others) on Supabase, plus a scheduled sender in <code>netlify.toml</code>.
+      All of it is written to the Netlify handler signature.
+    </td>
+  </tr>
+</table>
+
+<h2 id="demand">The keyword nobody is searching for</h2>
+
+<p>
+  The instinct is to optimise for <strong>"thanaka aftershave"</strong>. Nobody searches that, because
+  it is not a category that exists — you would be the only result and it would be worth nothing.
+  Search demand for this product lives in the <em>problem</em>, not the ingredient:
+</p>
+
+<table>
+  <tr><th>Query family</th><th>Character</th><th>Worth chasing?</th></tr>
+  <tr>
+    <td><code>razor bumps</code>, <code>razor burn</code>, <code>how to stop razor bumps</code></td>
+    <td>High volume, high commercial intent, and defended by large grooming brands with real budgets.</td>
+    <td>Long-term. Not winnable in year one.</td>
+  </tr>
+  <tr>
+    <td><code>pseudofolliculitis barbae treatment</code></td>
+    <td>Lower volume, clinical vocabulary, very high intent — people who search this have the problem badly.</td>
+    <td><strong>Yes.</strong> Competition is medical sites that sell nothing.</td>
+  </tr>
+  <tr>
+    <td><code>aftershave for ingrown hairs</code>, <code>aftershave for sensitive skin</code></td>
+    <td>Mid volume, mid competition, buying intent.</td>
+    <td><strong>Yes.</strong> The realistic commercial target.</td>
+  </tr>
+  <tr>
+    <td><code>thanaka</code>, <code>thanaka powder</code>, <code>what is thanaka</code>, <code>thanaka for acne</code></td>
+    <td>
+      Real, steady, global volume driven by curiosity and the Burmese diaspora — and almost
+      entirely unmonetised in English. The pages that rank are encyclopedia entries and travel blogs.
+    </td>
+    <td><strong>This is the opening.</strong></td>
+  </tr>
+</table>
+
+<div class="callout">
+  <h4>The strategy in one line</h4>
+  <p>
+    Win <strong>thanaka</strong> on the strength of writing, because it is uncontested and you can
+    credibly out-write everyone; sell the razor-bump product to the people that brings. You are not
+    competing with Gillette for "razor burn" in year one. You are becoming the best English-language
+    page about thanaka, which is achievable in a month, and which arrives pre-qualified with people
+    who already want a botanical on their face.
+  </p>
+</div>
+
+<p>
+  The same logic applies to the rest of the catalogue and is worth far more than this one product:
+  every herb in the <code>HERBS</code> array has mechanism writing attached to it that would rank for
+  long-tail queries like <em>"yerba santa for congestion"</em>. That content already exists and is
+  already paid for. It is simply locked inside a JavaScript array.
+</p>
+
+<h2 id="seo-build">What has to be built for SEO</h2>
+
+<p>
+  None of the keyword work matters until there are crawlable pages. In dependency order:
+</p>
+
+<ol>
+  <li>
+    <strong>A <code>&lt;title&gt;</code> and meta description on the existing page.</strong> Ten minutes,
+    and it is the highest-return change in this document. Do it regardless of everything below.
+  </li>
+  <li>
+    <strong>Real URLs per product and per herb</strong>, e.g. <code>/shop/thanaka-aftershave</code> and
+    <code>/herbs/yerba-santa</code>, each serving HTML that contains its own content before any
+    JavaScript runs.
+  </li>
+  <li>
+    <strong>A build step</strong> that generates those pages from the arrays already in
+    <code>index.html</code>. The data model is good; it just needs to be lifted out into a data file
+    and rendered to static HTML at deploy time. This keeps one source of truth and avoids
+    hand-maintaining 40 pages.
+  </li>
+  <li>
+    <strong><code>Product</code> JSON-LD</strong> on each product page — name, description, image,
+    price, availability. This is what produces the price-and-stock line under a search result, and
+    it is what the AI answer engines read.
+  </li>
+  <li>
+    <strong><code>sitemap.xml</code> and <code>robots.txt</code></strong>, then Google Search Console
+    and Bing Webmaster Tools verification.
+  </li>
+  <li>
+    <strong>Open Graph and Twitter card tags</strong>, so a link pasted into a message renders as a
+    product card rather than a bare URL. This matters more than its reputation suggests — most
+    early traffic for a product like this arrives through sharing, not search.
+  </li>
+</ol>
+
+<div class="callout note">
+  <h4>Sequencing against the two migration specs</h4>
+  <p>
+    Both <a href="apothecary-domain-move.html">the domain move</a> and
+    <a href="off-netlify-onto-cloudflare.html">the Cloudflare move</a> should land <em>before</em> this
+    work. Indexing a page on <code>tea.laurelate.com</code> and then deleting that hostname discards
+    whatever was earned, and Rosetta asked for a clean break with no redirect — so there is not even
+    a 301 to carry authority across. Build the search presence once, on the final hostname.
+  </p>
+</div>
+
+<h2 id="stripe">Stripe</h2>
+
+<p>
+  The phrasing "Stripe integration" understates it. There is no payment layer to integrate
+  <em>with</em> — the cart ends at a pickup screen. What is actually needed is a second, parallel
+  commerce path for a shippable physical good: payment, address capture, sales tax, a persisted
+  order, and a fulfilment signal.
+</p>
+
+<h3>Use hosted Stripe Checkout, not the Payment Element</h3>
+<p>
+  For a first physical SKU this is not a close call. Hosted Checkout is a redirect to a Stripe-run
+  page and it brings, at no build cost: PCI scope reduced to near zero, shipping address collection,
+  Stripe Tax calculation, 3-D Secure and SCA handling, and Apple Pay and Google Pay working on day
+  one. The custom Payment Element buys visual control over the card form and costs weeks of
+  compliance surface. Take the redirect.
+</p>
+
+<h3>Two functions, and the second one is not optional</h3>
+<table>
+  <tr><th>Function</th><th>Job</th></tr>
+  <tr>
+    <td><code>create-checkout-session</code></td>
+    <td>
+      Receives the cart, <strong>re-prices every line server-side from the catalogue</strong>, creates a
+      Stripe Checkout Session, returns the redirect URL. Never trusts a price sent by the browser.
+    </td>
+  </tr>
+  <tr>
+    <td><code>stripe-webhook</code></td>
+    <td>
+      Listens for <code>checkout.session.completed</code>, verifies the Stripe signature, and only then
+      writes the paid order into Supabase.
+    </td>
+  </tr>
+</table>
+
+<div class="callout warn">
+  <h4>The success redirect is not proof of payment</h4>
+  <p>
+    A customer can close the tab before the redirect, and anyone can visit the success URL directly.
+    If orders are recorded on redirect rather than on the verified webhook, the shop will both miss
+    real paid orders and record fake ones. The webhook is the only trustworthy signal, and its
+    signature must be verified against the signing secret — an unverified webhook endpoint is an
+    open door that lets anyone POST themselves a free order.
+  </p>
+</div>
+
+<h3>Using Laurelate's Stripe account — one real complication</h3>
+<p>
+  A single Stripe account can sell for two brands without difficulty. The problem is the
+  <strong>statement descriptor</strong>: the customer buys from "Forest Apothecary" and then sees
+  <code>LAURELATE</code> on their card statement three days later. Unrecognised descriptors are one
+  of the most common causes of chargebacks, and chargebacks are expensive and damage the account's
+  standing.
+</p>
+<p>
+  Two ways out. Either set <code>statement_descriptor_suffix</code> on the session so the line reads
+  something like <code>LAURELATE* APOTHEC</code>, which is cheap and works; or open a separate Stripe
+  account for the Apothecary, which is cleaner for bookkeeping and for ever selling the brand
+  separately, at the cost of a second onboarding. <strong>Recommendation: suffix now, separate
+  account if the Apothecary starts carrying its own catalogue.</strong>
+</p>
+
+<h3>The mixed basket</h3>
+<p>
+  The current cart assumes every line is collected at the counter. The aftershave ships. A basket
+  holding a Black Sage tea and a jar of aftershave is therefore incoherent — one line has no
+  shipping and is paid in person, the other has both. This needs a decision before any code is
+  written; it is a product question, not a technical one.
+</p>
+<p>
+  The cheapest coherent answer is to keep the shop separate: pickup items stay in the existing
+  cart, shippable goods get their own <code>/shop</code> path with its own cart and Stripe checkout.
+  Merging them later is easy. Un-merging them is not.
+</p>
+
+<h3>Everything else that has to be true before a card can be charged</h3>
+<ul>
+  <li><strong>Sales tax.</strong> Stripe Tax handles calculation, but registration is a legal step Rosetta must take in each nexus state. Cosmetics are taxable in most.</li>
+  <li><strong>Shipping.</strong> Origin address, carrier, and whether rates are flat, weighted, or free above a threshold. Flat rate is the right first answer.</li>
+  <li><strong>Refund and shipping policy pages.</strong> Stripe expects them, and their absence is a common reason for account review.</li>
+  <li><strong>MoCRA.</strong> Facility registration, product listing, and a safety substantiation file on record before a cosmetic is sold in the US. This gates launch independently of any of the above.</li>
+</ul>
+
+<div class="callout ask">
+  <h4>Keys are Rosetta's to set, not Claude's to handle</h4>
+  <p>
+    The Stripe secret key and the webhook signing secret should be set directly as environment
+    variables in the hosting dashboard. They should not be pasted into a chat, written into a file,
+    or committed. Claude can write every line of code that reads
+    <code>process.env.STRIPE_SECRET_KEY</code> without ever seeing its value.
+  </p>
+</div>
+
+<h2 id="order">Proposed order of work</h2>
+<table>
+  <tr><th>#</th><th>Step</th><th>Why here</th></tr>
+  <tr><td>0</td><td>Add a <code>&lt;title&gt;</code> and meta description</td><td>Ten minutes, independent of everything, currently costing every visit.</td></tr>
+  <tr><td>1</td><td>Finish the domain move and the Cloudflare move</td><td>So nothing built below is thrown away.</td></tr>
+  <tr><td>2</td><td>Lift <code>DRINKS</code> and <code>HERBS</code> out to a data file; add a static build</td><td>The foundation both product pages and herb pages stand on.</td></tr>
+  <tr><td>3</td><td>Generate <code>/shop/*</code> and <code>/herbs/*</code> with JSON-LD, sitemap, robots</td><td>This is the actual SEO deliverable.</td></tr>
+  <tr><td>4</td><td>Build the shop cart and the two Stripe functions</td><td>Needs real product URLs to exist first.</td></tr>
+  <tr><td>5</td><td>Write the thanaka pillar article and link it to the product</td><td>The traffic strategy. Worthless without step 3.</td></tr>
+</table>
+
+<h2 id="decisions">Decisions blocking the build</h2>
+<ol>
+  <li><strong>Hosted Checkout or Payment Element?</strong> Recommendation: hosted.</li>
+  <li><strong>Laurelate's Stripe account with a descriptor suffix, or a new account?</strong> Recommendation: suffix for now.</li>
+  <li><strong>Separate shop cart, or one cart handling both pickup and shipping?</strong> Recommendation: separate.</li>
+  <li><strong>Natural preservative system, or phenoxyethanol?</strong> Affects the formula spec and the brand story, not the code.</li>
+</ol>
+
+<p class="meta" style="margin-top:2.5rem">
+  Formulation, label copy and claims for the product itself are a separate document — this one covers
+  only how it gets found and paid for.
+</p>
+
+</div>
+</body>
+</html>
