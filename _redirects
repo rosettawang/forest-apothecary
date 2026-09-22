@@ -1,0 +1,15 @@
+# Netlify publishes this repository from its root, so every committed file is a
+# candidate for being served. Proved Sep 21, 2026: /supabase-schema.sql returned
+# 200 on the live site. specs/ had not deployed yet only because the live build
+# predated the commit that added it, which is luck rather than protection.
+#
+# These rules are that protection. Anything internal gets a 404, and the
+# stylesheet and nav beside the specs go with them so the folder is not
+# partially readable.
+/specs/*              /404.html  404
+/scripts/*            /404.html  404
+/CLAUDE.md            /404.html  404
+/supabase-schema.sql  /404.html  404
+/package.json         /404.html  404
+/package-lock.json    /404.html  404
+/netlify.toml         /404.html  404
