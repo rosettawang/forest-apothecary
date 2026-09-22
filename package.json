@@ -2,5 +2,11 @@
   "dependencies": {
     "@netlify/blobs": "^8.0.0",
     "@netlify/functions": "^2.8.1"
+  },
+  "scripts": {
+    "specs:check": "node scripts/prune-specs.mjs --dry-run && node scripts/plan-specs.mjs",
+    "specs:prune": "node scripts/prune-specs.mjs && node scripts/plan-specs.mjs --write",
+    "specs:plan": "node scripts/plan-specs.mjs",
+    "style:check": "node scripts/check-house-style.mjs"
   }
 }

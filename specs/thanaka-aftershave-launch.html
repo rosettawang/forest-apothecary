@@ -6,12 +6,15 @@
 <meta name="spec-status" content="open" />
 <meta name="spec-priority" content="20" />
 <meta name="spec-priority-why" content="Nothing here is urgent in the way a broken URL is urgent, but the sequencing is load-bearing: link-building and indexing done before the domain move is thrown away, and Stripe written for Netlify Functions is rewritten for Cloudflare Workers. Both wasted efforts are avoidable by doing this after the two migration specs and not before." />
-<meta name="spec-decision" content="Four decisions are Rosetta's and block the build: (1) hosted Stripe Checkout vs custom Payment Element - recommendation is hosted; (2) Laurelate's existing Stripe account vs a new Forest Apothecary account - the statement descriptor is the deciding factor; (3) whether a shippable product shares the existing pickup cart or gets a separate flow; (4) natural preservative system vs phenoxyethanol for the lotion." />
-<meta name="spec-needs" content="Jar capacity and material from the Temu listing (login wall - Claude could not read it). Stripe publishable and secret keys set as environment variables by Rosetta, never pasted into chat or committed. Sales-tax nexus states. Shipping origin address and carrier choice." />
-<meta name="spec-touches" content="index.html, netlify/functions/ (or the Workers equivalent), package.json, a new product-page build step, and new robots.txt + sitemap.xml at the site root." />
-<meta name="spec-touches-why" content="Product SEO cannot be done inside the current single-file client-rendered app, so this necessarily adds a build step and real URLs rather than editing copy in place." />
+<meta name="spec-decision" content="Hosted Stripe Checkout or the custom Payment Element? Recommendation: hosted. It brings shipping address collection, Stripe Tax, SCA and Apple/Google Pay at no build cost and keeps PCI scope at nothing. Blocks the checkout build." />
+<meta name="spec-decision" content="Laurelate's existing Stripe account or a new Forest Apothecary one? Recommendation: keep Laurelate and set statement_descriptor_suffix, so the card line does not read only LAURELATE to someone who bought from the Apothecary. Revisit if the Apothecary starts carrying its own catalogue. Does not block." />
+<meta name="spec-decision" content="Does a shippable product share the existing pickup cart, or get its own flow? Recommendation: separate. The current cart assumes every line is collected at the counter, and merging later is easy while un-merging is not. Blocks the cart work but not the single-product page." />
+<meta name="spec-decision" content="Natural preservative system or phenoxyethanol for the lotion? Affects the formula spec and the brand story, not the code. Does not block anything in this spec." />
+<meta name="spec-needs" content="apothecary-domain-move, off-netlify-onto-cloudflare" />
+<meta name="spec-touches" content="index.html, package.json, robots.txt, sitemap.xml, shop, notes, netlify/functions" />
+<meta name="spec-touches-why" content="Product SEO cannot be done inside the single-file client-rendered app, so this adds static pages and a sitemap rather than editing copy in place. The Stripe path adds two functions." />
 <meta name="spec-verify" content="curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q '&lt;title&gt;' &amp;&amp; curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q 'application/ld+json' &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} https://apothecary.rosettawang.org/sitemap.xml) = 200" />
-<title>Selling the Thanaka Aftershave — SEO and Stripe</title>
+<title>Selling the Thanaka Aftershave · SEO and Stripe</title>
 <link rel="stylesheet" href="spec.css" />
 </head>
 <body>

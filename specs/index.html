@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="spec-status" content="canonical" />
+<title>Forest Apothecary · Internal Specs Index</title>
+<link rel="stylesheet" href="spec.css" />
+</head>
+<body>
+
+<div class="internal">Internal planning document · <b>not part of the app</b> · never deploy <code>specs/</code></div>
+
+<div class="wrap">
+
+<h1 id="top">Forest Apothecary Internal Specs</h1>
+<p class="meta">Canonical index · never pruned (this file is <code>spec-status: canonical</code>, so <code>specs:prune</code> skips it) · created Sep 21, 2026</p>
+<p class="lede">Working notes for building the Apothecary. This folder is planning material, not app content. It is not built, not deployed, and not reachable from the site.</p>
+
+<div class="callout warn">
+  <h4>Keep it internal</h4>
+  <p>
+    These documents hold unresolved regulatory questions, draft product copy, and infrastructure
+    plans that are not cleared for publication. Netlify publishes this repository from its root, so
+    <strong>anything committed here is a candidate for being served.</strong> Confirm
+    <code>specs/</code> is excluded by the publish configuration before treating it as private, and
+    never link to it from the app.
+  </p>
+</div>
+
+<nav class="index-nav" aria-label="Sections of this page">
+  <a href="#live-specs">Live specs</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#execution-order">Execution order</a>
+  <a href="#spec-pass">Spec pass</a>
+  <a href="#done">Completed</a>
+  <a class="to-top" href="#top">↑ Top</a>
+</nav>
+
+<h2 id="live-specs">Live specs</h2>
+<p class="meta">Written by <code>npm run specs:prune</code>. Edit the specs, not this list.</p>
+
+<ul class="spec-list">
+  <li>
+    <a href="apothecary-domain-move.html">Moving the Apothecary off tea.laurelate.com</a>
+    <span class="tag tag-blocked">blocked</span>
+    <p>Goal: this app answers on apothecary.rosettawang.org and tea.laurelate.com stops existing. Rosetta asked for a clean break — no redirect — so old links will simply fail to resolve.</p>
+    <p class="blocker"><strong>Blocked:</strong> ONE STEP, AND IT IS ROSETTA&amp;apos;S. Netlify must be told the new hostname before the old one is deleted, and that needs a Netlify login - the app.netlify.com session is not signed in, and the &amp;quot;Log in with GitHub&amp;quot; route is an OAuth grant, so it is a Login pass item rather than something Claude can do. In Netlify, open the gorgeous-moxie-b6f8eb site, then Domain management, then Add a domain, and add apothecary.rosettawang.org. DNS is already pointing at Netlify (added Sep 21, 2026) so verification should be immediate and the certificate usually lands within minutes. Everything either side of that click is done or ready.</p>
+  </li>
+  <li>
+    <a href="thanaka-aftershave-launch.html">Selling the Thanaka Aftershave · SEO and Stripe</a>
+    <span class="tag tag-open">open</span>
+    <p>Goal: a stranger searching for a razor-bump remedy finds the Thanaka Aftershave, reads a page that loads without JavaScript, and pays with a card. Today none of those three things is possible, for reasons that are architectural rather than cosmetic.</p>
+  </li>
+  <li>
+    <a href="off-netlify-onto-cloudflare.html">Taking the Apothecary off Netlify and onto Cloudflare</a>
+    <span class="tag tag-open">open</span>
+    <p>Goal: this app runs entirely on the Cloudflare account that already hosts laurelate-website and iceland-doc — one dashboard, one bill, one place to look when something breaks — with Supabase still doing the data and nothing about the app's behaviour changing.</p>
+    <p class="blocker"><strong>Remaining:</strong> NOT STARTED. Nothing blocks the code work: all ten handlers, the blob usage and the cron are readable in this repo and the port can be written and tested without a single credential. TWO THINGS NEED ROSETTA, and neither blocks building. (1) NINE SECRET VALUES, which only she can read out of the dashboards: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, LOGS_SECRET, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM. Running wrangler secret put is not hers; reading the values is. Account step: see Login pass. (2) THE CUTOVER ITSELF, because this app holds real accounts and personal wellness journals and the reminder job sends real SMS to real phone numbers. See the double-send warning.</p>
+  </li>
+</ul>
+
+<h2 id="decisions">Decisions</h2>
+<!-- GENERATED:DECISIONS:START -->
+<p class="meta">7 decisions across 2 specs, generated from each spec's <code>spec-decision</code> meta. Answer one and it disappears from here on the next prune.</p>
+<ul class="spec-decision-list">
+  <li>
+    <a href="thanaka-aftershave-launch.html">Selling the Thanaka Aftershave · SEO and Stripe</a>
+    <ul>
+      <li>Hosted Stripe Checkout or the custom Payment Element? Recommendation: hosted. It brings shipping address collection, Stripe Tax, SCA and Apple/Google Pay at no build cost and keeps PCI scope at nothing. Blocks the checkout build.</li>
+      <li>Laurelate's existing Stripe account or a new Forest Apothecary one? Recommendation: keep Laurelate and set statement_descriptor_suffix, so the card line does not read only LAURELATE to someone who bought from the Apothecary. Revisit if the Apothecary starts carrying its own catalogue. Does not block.</li>
+      <li>Does a shippable product share the existing pickup cart, or get its own flow? Recommendation: separate. The current cart assumes every line is collected at the counter, and merging later is easy while un-merging is not. Blocks the cart work but not the single-product page.</li>
+      <li>Natural preservative system or phenoxyethanol for the lotion? Affects the formula spec and the brand story, not the code. Does not block anything in this spec.</li>
+    </ul>
+  </li>
+  <li>
+    <a href="off-netlify-onto-cloudflare.html">Taking the Apothecary off Netlify and onto Cloudflare</a>
+    <ul>
+      <li>One Worker with a router, or ten Workers? Recommended: ONE, with a path router. Workers has no one-file-per-endpoint convention the way Netlify Functions does, and ten Workers would mean ten deploys, ten secret sets and ten dashboard entries for what is one app. The cost is that a syntax error takes all ten endpoints down instead of one, which is what the build step is for. Cheap to reverse early, expensive later. Does not block.</li>
+      <li>Keep the /.netlify/functions/ URL shape, or move to /api/? Recommended: KEEP IT, at least through cutover. index.html reaches the backend through exactly two strings - a base at line 1015 and one hardcoded chat path at line 956 - so either choice is a small edit, BUT index.html is a generated artifact (see the support.js risk) and not editing it at all is worth more than a tidy URL. Rename in a later pass once the Worker is proven. Does not block.</li>
+      <li>Netlify Blobs replacement: KV or R2? Recommended: KV. The store is used in exactly two places for one purpose - chat.js writes a query log under a timestamp-plus-random key with setJSON, get-logs.js reads them back - which is a key-value store with small JSON values and no listing requirements beyond a prefix scan. R2 would be object storage for something that is not objects. Does not block.</li>
+    </ul>
+  </li>
+</ul>
+<!-- GENERATED:DECISIONS:END -->
+
+<h2 id="execution-order">Execution order</h2>
+<!-- GENERATED:EXECUTION-ORDER:START -->
+<p class="meta">Generated by <code>npm run specs:plan -- --write</code>. Do not hand-edit: it is derived from each spec's <code>spec-needs</code>, <code>spec-touches</code>, <code>spec-deletes</code> and <code>spec-decision</code>. To change the order, change a spec's meta — that is the point, so it cannot go stale.</p>
+<ol class="spec-order">
+  <li><a href="apothecary-domain-move.html">apothecary-domain-move</a> — Moving the Apothecary off tea.laurelate.com<br /><span class="meta" style="margin:0"><strong>blocked</strong></span><br /><span class="meta" style="margin:0"><strong>Why here:</strong> The new hostname already resolves and serves a certificate error, so the longer this sits half-done the longer a broken URL exists that someone could be given.</span></li>
+  <li><a href="off-netlify-onto-cloudflare.html">off-netlify-onto-cloudflare</a> — Taking the Apothecary off Netlify and onto Cloudflare<br /><span class="meta" style="margin:0"><strong>3 decisions waiting on Rosetta</strong> · after apothecary-domain-move · shares <code>netlify/functions</code>, <code>index.html</code></span><br /><span class="meta" style="margin:0"><strong>Why here:</strong> Nothing is broken today - Netlify works. This is consolidation, so it waits behind the domain move and behind anything actually failing.</span></li>
+  <li><a href="thanaka-aftershave-launch.html">thanaka-aftershave-launch</a> — Selling the Thanaka Aftershave · SEO and Stripe<br /><span class="meta" style="margin:0"><strong>4 decisions waiting on Rosetta</strong> · after apothecary-domain-move + off-netlify-onto-cloudflare · shares <code>netlify/functions</code>, <code>index.html</code></span><br /><span class="meta" style="margin:0"><strong>Why here:</strong> Nothing here is urgent in the way a broken URL is urgent, but the sequencing is load-bearing: link-building and indexing done before the domain move is thrown away, and Stripe written for Netlify Functions is rewritten for Cloudflare Workers. Both wasted efforts are avoidable by doing this after the two migration specs and not before.</span></li>
+</ol>
+<!-- GENERATED:EXECUTION-ORDER:END -->
+
+<h2 id="spec-pass">Spec pass</h2>
+<!-- GENERATED:SPEC-PASS:START -->
+<p><strong>Spec pass, how specs get worked by default.</strong> A session runs the whole thing without asking what to do next.</p>
+<ol>
+  <li><strong>Reassess the spec first.</strong> A spec is a starting point, not a contract. Check its claims against the current code, schema and live state before building. Specs here go stale. Where reality has moved, correct the spec and say what changed.</li>
+  <li><strong>Sequence it, then work the sequence end to end.</strong> Do not stop after one item to report progress, and do not ask which item to do next.</li>
+  <li><strong>Use discretion to build it out.</strong> Fill gaps the spec left, fix what it got wrong, improve on it where the better design is clear. Note the deviations.</li>
+  <li><strong>Stop only at a blocker or a decision:</strong> credentials, a dashboard, an account, content only Rosetta can write, or a choice that is structural and hard to reverse. Not on mere uncertainty. If a call is cheap and reversible, make it, note it, keep going. Stopping means stopping that spec, never the session.</li>
+  <li><strong>Log the stop</strong> in that spec's <code>&lt;meta name="spec-blocker"&gt;</code>, dated, then run <code>npm run specs:prune</code> so the index reflects it. A blocker must name a human, a credential or an account. "Revisit later" is parked, not blocked, and a later run that reads it as a blocker will end early believing it is finished.</li>
+  <li><strong>Declare each decision separately</strong>, one <code>&lt;meta name="spec-decision"&gt;</code> per choice, stating the recommended answer and whether it blocks. The prune collects these into the index. Write the meta when you notice the decision, not when you finish the spec. A decision with no recommendation is a question, and a question is harder to answer than a proposal.</li>
+</ol>
+<p><code>spec-needs</code> takes the names of other specs, and <code>spec-touches</code> takes paths. Both are parsed, so prose in either produces nonsense in the derived order.</p>
+<!-- GENERATED:SPEC-PASS:END -->
+
+<h2 id="done">Completed</h2>
+<p class="meta">Appended by <code>npm run specs:prune</code> as specs are marked <code>done</code> and deleted.</p>
+<ul class="spec-done-list">
+</ul>
+
+</div>
+<script src="spec-nav.js"></script>
+</body>
+</html>

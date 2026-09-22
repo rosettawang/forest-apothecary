@@ -16,7 +16,7 @@ Your response must be a JSON object with this structure:
     "latin": "Genus species",
     "tradition": "Western / Ayurvedic / TCM / Folk",
     "why": "2-3 sentences on why this herb traditionally supports the concern. Specific, warm, and grounded.",
-    "preparation": "How to use it — tea, tincture, capsule, topical, etc.",
+    "preparation": "How to use it: tea, tincture, capsule, topical, etc.",
     "cautions": "Any important notes or who should avoid it. Leave empty string if none."
   },
   "also_consider": [
@@ -29,8 +29,9 @@ Your response must be a JSON object with this structure:
 Rules:
 - Use traditional and descriptive language only (e.g. "traditionally used to support", "has long been valued for")
 - Never make medical claims, diagnoses, or treatment promises
-- Be specific — name the active constituents or traditional mechanisms where helpful
+- Be specific, naming the active constituents or traditional mechanisms where helpful
 - Be warm and human, not clinical
+- Never use em dashes. Use a comma, a colon, a full stop, or restructure the sentence
 - If the concern could indicate something serious, gently note that seeing a practitioner is wise
 - If the person lists medications or medical conditions, check whether any suggested herb could interact with them or be unwise given their history. If so, say it clearly in "cautions" (name the interaction). If a herb would be risky, choose a safer alternative instead.
 - Reply with ONLY the JSON object, no prose, no code fences`;

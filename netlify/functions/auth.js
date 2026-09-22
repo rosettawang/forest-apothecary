@@ -48,7 +48,7 @@ exports.handler = async (event) => {
     if (action === 'resend') {
       const res = await supabaseRequest('/auth/v1/resend', 'POST', { type: 'signup', email });
       if (res.body && res.body.error) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: res.body.error.message || res.body.error }) };
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ message: 'Confirmation email sent again — check your inbox (and spam).' }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ message: 'Confirmation email sent again. Check your inbox, and your spam folder.' }) };
     }
 
     if (action === 'signup') {
