@@ -71,7 +71,9 @@
   .energetics{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a9279;margin-bottom:18px}
   .price{font-family:'Cormorant Garamond',serif;font-size:30px;margin:0 0 4px}
   .size{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#8a9279;margin-bottom:20px}
-  .buy{padding:16px 46px;border-radius:999px;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+  .buy{padding:16px 46px;border-radius:999px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+       font-family:'Jost',sans-serif;font-weight:400}
+  .buy[disabled]{opacity:.6;cursor:default}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-top:26px}
   .shot{aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .shot img{max-width:58%;max-height:58%;width:auto;height:auto;object-fit:contain;opacity:.55}
@@ -122,8 +124,10 @@
       <div class="price">$28</div>
       <div class="size">30 ml · small batch</div>
 
-      <!-- ▼ PASTE YOUR STRIPE PAYMENT LINK IN THE href BELOW ▼ -->
-      <a class="neu-btn buy" href="#STRIPE_PAYMENT_LINK">Add to order</a>
+      <button class="neu-btn buy" id="buy" type="button">Add to order</button>
+      <p class="fine" id="buyerr" style="margin-top:12px;color:#7a2b2b;display:none">
+        Something went wrong starting checkout. Try again in a moment.
+      </p>
 
       <p class="fine" style="margin-top:20px">
         Made in small batches, so it sells out. Ships in 2–3 days.
@@ -213,5 +217,32 @@
   </footer>
 
 </div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('buy');
+    var err = document.getElementById('buyerr');
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      btn.textContent = 'One moment';
+      err.style.display = 'none';
+      fetch('/.netlify/functions/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ id: 'thanaka-aftershave', qty: 1 }] })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.url) { window.location = d.url; return; }
+          throw new Error(d && d.error ? d.error : 'no url');
+        })
+        .catch(function () {
+          btn.disabled = false;
+          btn.textContent = 'Add to order';
+          err.style.display = 'block';
+        });
+    });
+  })();
+</script>
 </body>
 </html>

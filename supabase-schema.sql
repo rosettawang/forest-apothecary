@@ -127,3 +127,26 @@ begin new.updated_at = now(); return new; end; $$;
 drop trigger if exists consultations_touch on public.consultations;
 create trigger consultations_touch before update on public.consultations
   for each row execute function public.touch_updated_at();
+
+-- ============================================================
+-- ORDERS — paid shop orders, written only by the Stripe webhook
+-- ============================================================
+-- No RLS policies on purpose. RLS is on and nothing is granted, so the
+-- anon key can neither read nor write this table. The webhook uses the
+-- service role key, which bypasses RLS. Orders must never be writable
+-- from the browser: the only trustworthy source is a Stripe event whose
+-- signature verified.
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  stripe_session_id text not null unique,
+  stripe_payment_intent text,
+  email text,
+  amount_total integer not null,
+  currency text not null default 'usd',
+  items jsonb not null default '[]'::jsonb,
+  shipping jsonb,
+  status text not null default 'paid',
+  created_at timestamptz not null default now()
+);
+alter table public.orders enable row level security;
+create index if not exists orders_created_at_idx on public.orders (created_at desc);
