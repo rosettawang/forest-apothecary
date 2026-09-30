@@ -68,27 +68,39 @@ const run = async () => {
     const phoneByUser = {};
     (profs.body || []).forEach(p => { if (p.sms_opt_in && p.phone) phoneByUser[p.id] = p.phone; });
 
-    let sent = 0, requeued = 0;
+    let sent = 0, requeued = 0, claimedElsewhere = 0;
     for (const r of rows) {
-      const phone = phoneByUser[r.user_id];
-      if (phone) {
-        const resp = await sendSms(phone, r.message);
-        if (resp.status >= 200 && resp.status < 300) sent++;
-      }
+      // Claim the row BEFORE texting anyone. The PATCH only matches while the
+      // row still has the send_at and sent=false this run read, so if two
+      // runners overlap (Netlify's schedule and Cloudflare's cron during the
+      // move, or a slow run meeting the next one) exactly one gets the row
+      // back and the other skips it. Without this, both would text.
+      let claim;
       if (r.repeat === 'daily') {
         // re-queue for the next day, keeping the same local clock time.
         // Advance from the scheduled time (not "now") and skip past any missed days.
         const next = new Date(r.send_at);
         const now = new Date();
         do { next.setUTCDate(next.getUTCDate() + 1); } while (next <= now);
-        await supabase(`/rest/v1/reminders?id=eq.${r.id}`, 'PATCH', { send_at: next.toISOString(), sent: false });
-        requeued++;
+        claim = { send_at: next.toISOString(), sent: false };
       } else {
         // one-shot: mark sent regardless so we don't retry forever on a bad number
-        await supabase(`/rest/v1/reminders?id=eq.${r.id}`, 'PATCH', { sent: true });
+        claim = { sent: true };
+      }
+      const won = await supabase(
+        `/rest/v1/reminders?id=eq.${r.id}&sent=eq.false&send_at=eq.${encodeURIComponent(r.send_at)}`,
+        'PATCH', claim
+      );
+      if (!Array.isArray(won.body) || !won.body.length) { claimedElsewhere++; continue; }
+      if (r.repeat === 'daily') requeued++;
+
+      const phone = phoneByUser[r.user_id];
+      if (phone) {
+        const resp = await sendSms(phone, r.message);
+        if (resp.status >= 200 && resp.status < 300) sent++;
       }
     }
-    return { statusCode: 200, body: `Processed ${rows.length} reminders, sent ${sent}, requeued ${requeued}.` };
+    return { statusCode: 200, body: `Processed ${rows.length} reminders, sent ${sent}, requeued ${requeued}, claimed elsewhere ${claimedElsewhere}.` };
   } catch (err) {
     return { statusCode: 500, body: 'Reminder error: ' + err.message };
   }
