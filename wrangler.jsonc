@@ -1,0 +1,36 @@
+// The Forest Apothecary Worker: the static site plus the twelve handlers in
+// netlify/functions/, which run unchanged behind the adapter in src/worker.js.
+// Plan and phases: specs/off-netlify-onto-cloudflare.html.
+{
+  "name": "forest-apothecary",
+  "main": "src/worker.js",
+  // From 2026-08-04 nodejs_compat is on by default, which is what lets the
+  // handlers keep require('https') and read secrets from process.env.
+  "compatibility_date": "2026-09-30",
+  "workers_dev": true,
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Serve /shop/thanaka-aftershave directly, matching the canonical tags,
+    // rather than 307ing to the slashed form.
+    "html_handling": "drop-trailing-slash",
+    // The Worker sees every request so it can redirect www to the apex.
+    "run_worker_first": true
+  },
+  "kv_namespaces": [
+    { "binding": "QUERIES", "id": "704c808ae879452797286161feb785d4" }
+  ],
+  // chat.js and get-logs.js still require('@netlify/blobs'), so the same
+  // files keep working on Netlify until cutover. Here that import is KV.
+  "alias": {
+    "@netlify/blobs": "./src/blobs-kv.js"
+  },
+  "vars": {
+    "SITE_URL": "https://apothecaryforest.com"
+  },
+  // No cron yet. It goes in at cutover (phase 5), once this Worker has been
+  // proven with real secrets, even though the reminder claim makes an
+  // overlap with Netlify's schedule safe.
+  "observability": { "enabled": true }
+}

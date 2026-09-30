@@ -6,7 +6,7 @@
 <meta name="spec-status" content="open" />
 <meta name="spec-priority" content="10" />
 <meta name="spec-priority-why" content="apothecaryforest.com was bought Sep 30, 2026 and the only URL that works today is tea.laurelate.com. Every other step (SEO, the Stripe webhook, the domain) now lands on Cloudflare, so doing any of it on Netlify first is work thrown away." />
-<meta name="spec-blocker" content="Sep 30, 2026. Phases 1 to 3 need nobody and can run now. FOUR THINGS NEED ROSETTA, each gating one phase, none gating the build. (1) SECRETS, before phase 4: copy the Netlify environment variables into a local JSON file and run npx wrangler@4 secret bulk on it herself, because Claude does not type API keys. The list is in the Secrets section. (2) LAURELATE STRIPE, before phase 4: the Stripe connector in this session is signed in to Wild Harvest and Restoration Fund, not Laurelate, so Claude cannot see or create the webhook. Either connect the Laurelate account or create the endpoint by hand, as the Stripe section says. (3) CLOUDFLARE ZONE, before phase 5: add apothecaryforest.com to the Cloudflare account (free plan, delete the imported Namecheap parking records) and change the nameservers at Namecheap to the two Cloudflare gives. Needs her Cloudflare dashboard and Namecheap logins. (4) ACCOUNT SMOKE TEST, in phase 4: sign up a throwaway account on the workers.dev URL, journal, consult, set a reminder, delete it. Claude does not create accounts outside localhost." />
+<meta name="spec-blocker" content="Sep 30, 2026. Phases 1 to 3 are DONE: the Worker is live at https://forest-apothecary.rosetta-760.workers.dev with all twelve routes answering, and the reminder claim is on Netlify. Phase 4 onward waits on Rosetta. FOUR THINGS NEED ROSETTA, each gating one phase, none gating the build. (1) SECRETS, before phase 4: copy the Netlify environment variables into a local JSON file and run npx wrangler@4 secret bulk on it herself, because Claude does not type API keys. The list is in the Secrets section. (2) LAURELATE STRIPE, before phase 4: the Stripe connector in this session is signed in to Wild Harvest and Restoration Fund, not Laurelate, so Claude cannot see or create the webhook. Either connect the Laurelate account or create the endpoint by hand, as the Stripe section says. (3) CLOUDFLARE ZONE, before phase 5: add apothecaryforest.com to the Cloudflare account (free plan, delete the imported Namecheap parking records) and change the nameservers at Namecheap to the two Cloudflare gives. Needs her Cloudflare dashboard and Namecheap logins. (4) ACCOUNT SMOKE TEST, in phase 4: sign up a throwaway account on the workers.dev URL, journal, consult, set a reminder, delete it. Claude does not create accounts outside localhost." />
 <meta name="spec-touches" content="netlify/functions,netlify.toml,package.json,wrangler.jsonc,src,.assetsignore,shop/thanaka-aftershave,CLAUDE.md" />
 <meta name="spec-touches-why" content="The handlers are wrapped, not rewritten: the only edits inside netlify/functions are the two Blobs call sites, the reminder claim, and the checkout origin list. index.html is not touched." />
 <meta name="spec-verify" content="test -f wrangler.jsonc &amp;&amp; test -f src/worker.js &amp;&amp; ! grep -q '@netlify' package.json &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/shop/thanaka-aftershave/) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/specs/index.html) = 404 &amp;&amp; curl -sSI --max-time 20 https://apothecaryforest.com/ | grep -qi 'server: cloudflare'" />
@@ -31,6 +31,20 @@
   <li><strong>The double-send risk gets fixed in code</strong>, not managed by careful ordering. See the reminders section.</li>
   <li><strong>The draft's three decisions are made</strong>, because each is cheap to reverse: one Worker with a router, keep the <code>/.netlify/functions/</code> paths, KV for the query log.</li>
 </ul>
+
+<h2 id="progress">Progress, Sep 30, 2026</h2>
+<table>
+  <tr><th>Phase</th><th>State</th></tr>
+  <tr><td>1. Scaffold</td><td><strong>Done.</strong> Worker <code>forest-apothecary</code> at <code>https://forest-apothecary.rosetta-760.workers.dev</code>. 21 files uploaded. Pages 200, unknown paths get the 404 page, and <code>/specs/index.html</code>, <code>/CLAUDE.md</code>, <code>/supabase-schema.sql</code>, <code>/package.json</code>, <code>/wrangler.jsonc</code>, <code>/src/worker.js</code>, <code>/netlify/functions/auth.js</code> all 404. All twelve routes answer with their own validation or not-configured replies. www to apex 301 checked locally.</td></tr>
+  <tr><td>2. KV</td><td><strong>Done, differently.</strong> Namespace <code>forest-apothecary-queries</code> (<code>704c808a…</code>). Instead of editing the two call sites, <code>wrangler.jsonc</code> aliases <code>@netlify/blobs</code> to <code>src/blobs-kv.js</code>, so the same files keep working on Netlify until cutover. Proved with a probe key written by Wrangler and read back through <code>get-logs</code>, then deleted.</td></tr>
+  <tr><td>3. Reminder claim</td><td><strong>Done.</strong> Commit <code>cf57dcf</code>, pushed to Netlify. Race test with two overlapping runs on a fake Supabase and Twilio: old code 4 texts for 2 reminders, new code 2.</td></tr>
+</table>
+<p class="meta">
+  Other deviations: the cron is left out of <code>wrangler.jsonc</code> until phase 5 (the <code>scheduled</code> handler is written and idle), so the Worker cannot text anyone before it has been proven.
+  <code>html_handling: "drop-trailing-slash"</code> serves the slashless URLs the canonicals already use, so no page edit was needed.
+  <code>SITE_ORIGINS</code> also lists <code>tea.laurelate.com</code>, so Netlify checkout still returns buyers to a working page; drop it in phase 6.
+  <code>netlify.toml</code> gained 404 rules for the new Worker files, since Netlify still publishes the repo root.
+</p>
 
 <h2 id="state">Live state, Sep 30, 2026</h2>
 <table>
@@ -147,8 +161,7 @@ rm ~/apothecary-secrets.json</code></pre>
 
 <h2 id="notes">Notes for whoever drives this</h2>
 <ul>
-  <li><strong>Trailing slash.</strong> Workers assets serve <code>/shop/thanaka-aftershave/</code> and redirect the slashless form to it. The canonical tag says slashless. After phase 1, check which form returns 200 directly and make the canonical, <code>og:url</code>, JSON-LD and sitemap match it. A canonical that redirects is a small SEO leak.</li>
-  <li><strong>Checkout origins.</strong> <code>create-checkout-session.js</code> sends buyers back to an allowlisted <code>Origin</code>. Add the workers.dev hostname to <code>SITE_ORIGINS</code> for phase 4, and drop <code>apothecary.rosettawang.org</code> since it is not coming.</li>
+  <li><strong>Checkout origins.</strong> <code>create-checkout-session.js</code> sends buyers back to an allowlisted <code>Origin</code>. In phase 6, drop the workers.dev and <code>tea.laurelate.com</code> entries.</li>
   <li><strong>Imported DNS.</strong> Adding a zone makes Cloudflare import what Namecheap had, including a <code>www</code> CNAME to the parking page. A custom domain cannot be created over an existing CNAME, so those records must go at zone setup.</li>
   <li><strong><code>support.js</code> is generated</strong> from a <code>dc-runtime/</code> that is not in this repo. This plan never edits <code>index.html</code>, which is why the <code>/.netlify/functions/</code> paths stay.</li>
 </ul>

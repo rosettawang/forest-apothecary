@@ -26,6 +26,15 @@ const CATALOGUE = {
   'thanaka-aftershave': { name: 'Thanaka Aftershave', amount: 2800, description: '30 ml' }
 };
 
+const SITE_ORIGINS = [
+  'https://apothecaryforest.com',
+  'https://www.apothecaryforest.com',
+  // Until cutover: the live Netlify host, and workers.dev so checkout can be
+  // proven on Cloudflare before the domain resolves.
+  'https://tea.laurelate.com',
+  'https://forest-apothecary.rosetta-760.workers.dev'
+];
+
 const SHIPPING_CENTS = 600;
 const MAX_QTY = 10;
 
@@ -111,7 +120,13 @@ exports.handler = async (event) => {
     });
   }
 
-  const site = process.env.SITE_URL || 'https://apothecary.rosettawang.org';
+  // Send the buyer back to the domain they bought on, so checkout works on
+  // workers.dev while apothecaryforest.com comes up. Only known hosts, because
+  // the Origin header is caller-supplied.
+  const origin = (event.headers && (event.headers.origin || event.headers.Origin)) || '';
+  const site = SITE_ORIGINS.includes(origin)
+    ? origin
+    : (process.env.SITE_URL || 'https://apothecaryforest.com');
 
   const params = {
     mode: 'payment',

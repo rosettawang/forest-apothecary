@@ -1,0 +1,20 @@
+# Everything in the repo root is uploaded as a static asset unless listed here.
+# Listed files are never uploaded, so they cannot be served by accident.
+.git
+.gitignore
+.assetsignore
+.wrangler
+.claude
+.DS_Store
+node_modules
+Claude outputs
+specs
+scripts
+netlify
+src
+CLAUDE.md
+*.sql
+package.json
+package-lock.json
+wrangler.jsonc
+netlify.toml
