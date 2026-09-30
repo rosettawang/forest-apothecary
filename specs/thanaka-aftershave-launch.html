@@ -10,10 +10,10 @@
 <meta name="spec-decision" content="Laurelate's existing Stripe account or a new Forest Apothecary one? Recommendation: keep Laurelate and set statement_descriptor_suffix, so the card line does not read only LAURELATE to someone who bought from the Apothecary. Revisit if the Apothecary starts carrying its own catalogue. Does not block." />
 <meta name="spec-decision" content="Does a shippable product share the existing pickup cart, or get its own flow? Recommendation: separate. The current cart assumes every line is collected at the counter, and merging later is easy while un-merging is not. Blocks the cart work but not the single-product page." />
 <meta name="spec-decision" content="Natural preservative system or phenoxyethanol for the lotion? Affects the formula spec and the brand story, not the code. Does not block anything in this spec." />
-<meta name="spec-needs" content="apothecary-domain-move, off-netlify-onto-cloudflare" />
+<meta name="spec-needs" content="off-netlify-onto-cloudflare" />
 <meta name="spec-touches" content="index.html, package.json, robots.txt, sitemap.xml, shop, notes, netlify/functions" />
 <meta name="spec-touches-why" content="Product SEO cannot be done inside the single-file client-rendered app, so this adds static pages and a sitemap rather than editing copy in place. The Stripe path adds two functions." />
-<meta name="spec-verify" content="curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q '&lt;title&gt;' &amp;&amp; curl -sS https://apothecary.rosettawang.org/shop/thanaka-aftershave | grep -q 'application/ld+json' &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} https://apothecary.rosettawang.org/sitemap.xml) = 200" />
+<meta name="spec-verify" content="curl -sS https://apothecaryforest.com/shop/thanaka-aftershave | grep -q '&lt;title&gt;' &amp;&amp; curl -sS https://apothecaryforest.com/shop/thanaka-aftershave | grep -q 'application/ld+json' &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} https://apothecaryforest.com/sitemap.xml) = 200" />
 <title>Selling the Thanaka Aftershave · SEO and Stripe</title>
 <link rel="stylesheet" href="spec.css" />
 </head>
