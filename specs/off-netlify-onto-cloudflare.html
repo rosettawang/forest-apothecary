@@ -6,7 +6,7 @@
 <meta name="spec-status" content="open" />
 <meta name="spec-priority" content="10" />
 <meta name="spec-priority-why" content="apothecaryforest.com was bought Sep 30, 2026 and the only URL that works today is tea.laurelate.com. Every other step (SEO, the Stripe webhook, the domain) now lands on Cloudflare, so doing any of it on Netlify first is work thrown away." />
-<meta name="spec-blocker" content="Sep 30, 2026. Phases 1 to 3 are DONE: the Worker is live at https://forest-apothecary.rosetta-760.workers.dev with all twelve routes answering, and the reminder claim is on Netlify. Phase 4 onward waits on Rosetta. FOUR THINGS NEED ROSETTA, each gating one phase, none gating the build. (1) SECRETS, before phase 4: copy the Netlify environment variables into a local JSON file and run npx wrangler@4 secret bulk on it herself, because Claude does not type API keys. The list is in the Secrets section. (2) LAURELATE STRIPE, before phase 4: the Stripe connector in this session is signed in to Wild Harvest and Restoration Fund, not Laurelate, so Claude cannot see or create the webhook. Either connect the Laurelate account or create the endpoint by hand, as the Stripe section says. (3) CLOUDFLARE ZONE, before phase 5: add apothecaryforest.com to the Cloudflare account (free plan, delete the imported Namecheap parking records) and change the nameservers at Namecheap to the two Cloudflare gives. Needs her Cloudflare dashboard and Namecheap logins. (4) ACCOUNT SMOKE TEST, in phase 4: sign up a throwaway account on the workers.dev URL, journal, consult, set a reminder, delete it. Claude does not create accounts outside localhost." />
+<meta name="spec-blocker" content="Sep 30, 2026. Phases 1 to 3 are DONE: the Worker is live at https://forest-apothecary.rosetta-760.workers.dev with all twelve routes answering, and the reminder claim is on Netlify. Phase 4 onward waits on Rosetta. FOUR THINGS NEED ROSETTA, each gating one phase, none gating the build. (1) SECRETS, before phase 4: copy the ten values from their source dashboards (Supabase, Anthropic, Twilio, Laurelate Stripe) into a local JSON file and run npx wrangler@4 secret bulk on it herself, because Claude does not type API keys. The list is in the Secrets section. (2) LAURELATE STRIPE, before phase 4: the Stripe connector in this session is signed in to Wild Harvest and Restoration Fund, not Laurelate, so Claude cannot see or create the webhook. Either connect the Laurelate account or create the endpoint by hand, as the Stripe section says. (3) CLOUDFLARE ZONE, before phase 5: add apothecaryforest.com to the Cloudflare account (free plan, delete the imported Namecheap parking records) and change the nameservers at Namecheap to the two Cloudflare gives. Needs her Cloudflare dashboard and Namecheap logins. (4) ACCOUNT SMOKE TEST, in phase 4: sign up a throwaway account on the workers.dev URL, journal, consult, set a reminder, delete it. Claude does not create accounts outside localhost." />
 <meta name="spec-touches" content="netlify/functions,netlify.toml,package.json,wrangler.jsonc,src,.assetsignore,shop/thanaka-aftershave,CLAUDE.md" />
 <meta name="spec-touches-why" content="The handlers are wrapped, not rewritten: the only edits inside netlify/functions are the two Blobs call sites, the reminder claim, and the checkout origin list. index.html is not touched." />
 <meta name="spec-verify" content="test -f wrangler.jsonc &amp;&amp; test -f src/worker.js &amp;&amp; ! grep -q '@netlify' package.json &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/shop/thanaka-aftershave/) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/specs/index.html) = 404 &amp;&amp; curl -sSI --max-time 20 https://apothecaryforest.com/ | grep -qi 'server: cloudflare'" />
@@ -88,12 +88,12 @@
 </p>
 <table>
   <tr><th>Name</th><th>Kind</th><th>From</th></tr>
-  <tr><td><code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>secret</td><td>Netlify env</td></tr>
-  <tr><td><code>ANTHROPIC_API_KEY</code>, <code>LOGS_SECRET</code></td><td>secret</td><td>Netlify env</td></tr>
-  <tr><td><code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, <code>TWILIO_FROM</code></td><td>secret</td><td>Netlify env</td></tr>
-  <tr><td><code>STRIPE_SECRET_KEY</code></td><td>secret</td><td>Netlify env, Laurelate account</td></tr>
+  <tr><td><code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>secret</td><td>Supabase dashboard, project settings, API</td></tr>
+  <tr><td><code>ANTHROPIC_API_KEY</code>, <code>LOGS_SECRET</code></td><td>secret</td><td>Anthropic console. <code>LOGS_SECRET</code> is any long random string; a new one is fine</td></tr>
+  <tr><td><code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, <code>TWILIO_FROM</code></td><td>secret</td><td>Twilio console</td></tr>
+  <tr><td><code>STRIPE_SECRET_KEY</code></td><td>secret</td><td>Laurelate Stripe dashboard, developers, API keys</td></tr>
   <tr><td><code>STRIPE_WEBHOOK_SECRET</code></td><td>secret</td><td><strong>New</strong>, from the new endpoint. The Netlify one belongs to the old URL.</td></tr>
-  <tr><td><code>SITE_URL</code> = <code>https://apothecaryforest.com</code>, <code>STRIPE_TAX_ENABLED</code></td><td>var, in <code>wrangler.jsonc</code></td><td>Copy the tax flag's value from Netlify</td></tr>
+  <tr><td><code>SITE_URL</code> = <code>https://apothecaryforest.com</code>, <code>STRIPE_TAX_ENABLED</code></td><td>var, in <code>wrangler.jsonc</code></td><td>Leave the tax flag unset (off) unless Stripe Tax is registered on the Laurelate account</td></tr>
 </table>
 <p>Rosetta writes the ten into a file outside the repo and runs, from the repo root:</p>
 <pre><code>npx wrangler@4 secret bulk ~/apothecary-secrets.json
@@ -145,13 +145,15 @@ rm ~/apothecary-secrets.json</code></pre>
     is now live alongside Netlify's, which phase 3 made safe.
   </li>
   <li>
-    <strong>Take Netlify out.</strong> Delete <code>netlify.toml</code>, drop <code>@netlify/blobs</code> and
+    <strong>Take Netlify out, the same day as cutover.</strong> No overlap week: rollback is
+    <code>wrangler rollback</code>, which is faster than repointing DNS, and Netlify never served
+    <code>apothecaryforest.com</code> anyway. Delete <code>netlify.toml</code>, drop <code>@netlify/blobs</code> and
     <code>@netlify/functions</code> so the dependency list is actually empty, update <code>CLAUDE.md</code>
     (hosting, the <code>.assetsignore</code> rule, how to deploy). Leave the handlers in
     <code>netlify/functions/</code>: renaming the folder is cosmetic, and so is the URL prefix.
   </li>
   <li>
-    <strong>Rosetta, a week later:</strong> in Netlify, turn off the site's scheduled function or delete the site;
+    <strong>Rosetta, the same day:</strong> delete the Netlify site;
     in Stripe, disable the old webhook endpoint; in Cloudflare DNS, delete the <code>tea</code> CNAME on
     <code>laurelate.com</code> (her clean break from Sep 21 still stands) and the dead
     <code>apothecary</code> CNAME on <code>rosettawang.org</code>. None of these can be done with the tools
