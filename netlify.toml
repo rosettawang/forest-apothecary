@@ -82,3 +82,12 @@
   to = "/404.html"
   status = 404
   force = true
+
+# The app moved to recommend/index.html (Oct 2, 2026). Until this site is
+# retired, keep tea.laurelate.com/ showing it in place. The page's
+# <base href="/"> keeps its assets resolving from the root.
+[[redirects]]
+  from = "/"
+  to = "/recommend/index.html"
+  status = 200
+  force = true

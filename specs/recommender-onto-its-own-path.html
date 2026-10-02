@@ -9,10 +9,7 @@
 <meta name="spec-needs" content="off-netlify-onto-cloudflare" />
 <meta name="spec-touches" content="index.html, recommend, src/worker.js, sitemap.xml, robots.txt" />
 <meta name="spec-touches-why" content="The app is one generated file and it moves. The Worker gains two host and path rules. The sitemap and robots name the old URL and would otherwise point at a page that has moved." />
-<meta name="spec-decision" content="How to fix the 20 relative asset references in index.html once it is no longer at the root? Recommended: one &lt;base href=&quot;/&quot;&gt; in its head. The alternative, rewriting all 20 to absolute paths, is a larger patch to a file generated outside this repo and so is likelier to be lost on the next regeneration. Blocks the move." />
-<meta name="spec-decision" content="What serves apothecaryforest.com/ after the recommender leaves it? Recommended: a 302 to /recommend until a real home page exists, and a 302 rather than a 301 so that a future home page is not fought by a permanent redirect already cached in people's browsers. Writing that home page is a separate spec. Does not block." />
-<meta name="spec-decision" content="Does tea.laurelate.com redirect before it is deleted, or is it a clean break? Recommended: redirect. Rosetta asked for a clean break on the earlier rosettawang move, but that hostname was never the live site and this one is, so the cases differ. The Worker can 301 it for one line of code, which costs nothing and avoids a dead-link window. Delete the DNS record 30 days later. Does not block the move itself." />
-<meta name="spec-blocker" content="Oct 2, 2026. NOT YET STARTED, and it cannot finish before off-netlify-onto-cloudflare reaches phase 5, because apothecaryforest.com does not resolve until that zone is added. TWO THINGS WILL NEED ROSETTA at the end, neither gating the build: (1) add tea.laurelate.com as a custom domain on the forest-apothecary Worker, so the 301 is served by Cloudflare rather than by the Netlify site being retired, which needs her Cloudflare dashboard; (2) 30 days later, delete the tea CNAME from the laurelate.com zone in Cloudflare. Everything else, the file move, the base tag, the Worker rules, the sitemap, can be built and proved on workers.dev first." />
+<meta name="spec-blocker" content="Oct 2, 2026. Phases 1 to 3 DONE and live on workers.dev. Phase 4 cannot start before off-netlify-onto-cloudflare reaches phase 5, because apothecaryforest.com does not resolve until that zone is added. TWO THINGS WILL NEED ROSETTA at the end, neither gating the build: (1) once apothecaryforest.com resolves, and not before or the 301 lands on a dead domain, delete the tea CNAME in the laurelate.com zone, because Cloudflare cannot create a Worker custom domain over an existing CNAME and Claude has no DNS write. Claude then adds the custom domain in wrangler.jsonc and deploys straight away, so the gap is seconds; (2) 30 days later, delete the tea CNAME from the laurelate.com zone in Cloudflare. Everything else, the file move, the base tag, the Worker rules, the sitemap, can be built and proved on workers.dev first." />
 <meta name="spec-verify" content="test -f recommend/index.html &amp;&amp; grep -q 'base href' recommend/index.html &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/recommend) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/support.js) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://tea.laurelate.com/) = 000" />
 <title>Moving the recommender onto its own path</title>
 <link rel="stylesheet" href="spec.css" />
@@ -45,6 +42,17 @@
     regeneration review. Twenty rewritten paths do not.
   </p>
 </div>
+
+<h2 id="progress">Progress, Oct 2, 2026</h2>
+<table>
+  <tr><th>Phase</th><th>State</th></tr>
+  <tr><td>1. Move and base tag</td><td><strong>Done.</strong> <code>recommend/index.html</code> with <code>&lt;base href="/"&gt;</code> right after the charset. Counted 20 relative references (19 lines), as the spec said. No fragment links or history calls, so the base tag cannot misroute in-page navigation. In a browser on workers.dev: styled, 18 images and none broken, <code>support.js</code> loaded, no console errors.</td></tr>
+  <tr><td>2. Root 302, sitemap</td><td><strong>Done.</strong> <code>/</code> answers 302 to <code>/recommend</code>, query string kept. Sitemap names <code>/recommend</code>. <code>robots.txt</code> did not need a change: it names only the sitemap URL, which has not moved.</td></tr>
+  <tr><td>3. tea 301</td><td><strong>Done, tested locally.</strong> The spec said to prove it by sending the Host header to production, but Cloudflare refuses a spoofed Host with 403, so it was proved under <code>wrangler dev</code>. Deviation: only <code>/</code> maps to <code>/recommend</code>; other paths keep their names, so an old <code>tea.laurelate.com/shop/thanaka-aftershave</code> link lands on the same product.</td></tr>
+</table>
+<p class="meta">
+  Added, not in the spec: Netlify auto-deploys from this repo and still serves tea.laurelate.com, so moving <code>index.html</code> would have left its root empty. <code>netlify.toml</code> now rewrites <code>/</code> to <code>/recommend/index.html</code> with a 200, which the base tag makes work. It goes when Netlify does.
+</p>
 
 <h2 id="state">Live state, Oct 2, 2026</h2>
 <table>
@@ -141,8 +149,8 @@
   <tr><th>#</th><th>Phase</th><th>Needs Rosetta?</th></tr>
   <tr><td>1</td><td>Move the file, add the base tag, prove the app loads on workers.dev</td><td>No</td></tr>
   <tr><td>2</td><td>Worker rules for the apex 302, sitemap and robots updated</td><td>No</td></tr>
-  <tr><td>3</td><td>Worker rule for the tea.laurelate.com 301, proved by sending the Host header directly</td><td>No</td></tr>
-  <tr><td>4</td><td>Add tea.laurelate.com as a custom domain on the Worker</td><td><strong>Yes, Cloudflare dashboard</strong></td></tr>
+  <tr><td>3</td><td>Worker rule for the tea.laurelate.com 301, proved under <code>wrangler dev</code></td><td>No</td></tr>
+  <tr><td>4</td><td>After apothecaryforest.com resolves: Rosetta deletes the tea CNAME, Claude adds tea.laurelate.com as a custom domain and deploys</td><td><strong>Yes, one DNS deletion</strong></td></tr>
   <tr><td>5</td><td>Thirty days later, delete the tea CNAME</td><td><strong>Yes, Cloudflare dashboard</strong></td></tr>
 </table>
 

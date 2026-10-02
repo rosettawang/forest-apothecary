@@ -41,7 +41,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LIST_ONLY = process.argv.includes('--list');
 
 /** Everything that ends up in front of a reader, including nav labels and JSON-LD. */
-const SCAN = ['index.html', 'shop', 'notes', 'netlify/functions'];
+const SCAN = ['recommend', 'shop', 'notes', 'netlify/functions'];
 const EXTS = new Set(['.html', '.js', '.mjs', '.json', '.md']);
 
 const BANNED = [{ char: '—', name: 'em dash', fix: 'comma, period, colon, or middot' }];
@@ -285,7 +285,7 @@ for (const rel of SCAN) {
  * import anything, and inventing a templating layer for it would be worse than
  * the duplication.
  * ------------------------------------------------------------------------- */
-const FACT_SCAN = ['index.html', 'shop', 'notes', 'netlify/functions',
+const FACT_SCAN = ['recommend', 'shop', 'notes', 'netlify/functions',
   // scripts/ was outside BOTH scan lists in the whrfund original until Sep 9,
   // 2026, which is the hole a stale letter footer fell through: the rule existed
   // and named the right replacement, and simply never ran over the file that had

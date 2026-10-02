@@ -64,6 +64,19 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    // The app's old home. Its root was the recommender; other paths (the shop,
+    // the notes) kept their names, so they map one to one.
+    if (url.hostname === 'tea.laurelate.com') {
+      const path = url.pathname === '/' ? '/recommend' : url.pathname;
+      return Response.redirect(`https://apothecaryforest.com${path}${url.search}`, 301);
+    }
+
+    // 302, not 301: a permanent redirect would be cached in browsers and fight
+    // a real home page when one ships.
+    if (url.pathname === '/') {
+      return new Response(null, { status: 302, headers: { Location: '/recommend' + url.search } });
+    }
+
     if (url.pathname.startsWith(PREFIX)) {
       const handler = HANDLERS[url.pathname.slice(PREFIX.length).replace(/\/$/, '')];
       if (!handler) return new Response('Not found', { status: 404 });

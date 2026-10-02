@@ -4,9 +4,11 @@ The Apothecary app, plus a small static storefront.
 
 ## What is here
 
-`index.html` is the whole app: a compiled `dc-runtime` React bundle (`support.js`) that
-renders the menu, the herbalist consultation and the pickup cart client-side from arrays
-declared inline. There is no router and no build step, so every screen lives at `/`.
+`recommend/index.html` is the whole app: a compiled `dc-runtime` React bundle (`support.js`)
+that renders the menu, the herbalist consultation and the pickup cart client-side from arrays
+declared inline. There is no router and no build step, so every screen lives at `/recommend`.
+Its `<base href="/">` points its relative asset paths at the root, where `support.js` and
+`assets/` stay. `/` is a 302 to `/recommend` until a real home page exists.
 
 `shop/` and `notes/` are plain static HTML, deliberately outside that bundle. They exist
 because a product cannot rank without a crawlable URL of its own, and they work unchanged
