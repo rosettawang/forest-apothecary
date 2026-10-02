@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="spec-status" content="open" />
+<meta name="spec-priority" content="15" />
+<meta name="spec-priority-why" content="It is cheap and it is in the way. The recommender currently occupies the root of the new domain, so every later question about what apothecaryforest.com should open with has to wait on this. Doing it during the Cloudflare cutover costs one file move; doing it afterwards means changing a live URL twice." />
+<meta name="spec-needs" content="off-netlify-onto-cloudflare" />
+<meta name="spec-touches" content="index.html, recommend, src/worker.js, sitemap.xml, robots.txt" />
+<meta name="spec-touches-why" content="The app is one generated file and it moves. The Worker gains two host and path rules. The sitemap and robots name the old URL and would otherwise point at a page that has moved." />
+<meta name="spec-decision" content="How to fix the 20 relative asset references in index.html once it is no longer at the root? Recommended: one &lt;base href=&quot;/&quot;&gt; in its head. The alternative, rewriting all 20 to absolute paths, is a larger patch to a file generated outside this repo and so is likelier to be lost on the next regeneration. Blocks the move." />
+<meta name="spec-decision" content="What serves apothecaryforest.com/ after the recommender leaves it? Recommended: a 302 to /recommend until a real home page exists, and a 302 rather than a 301 so that a future home page is not fought by a permanent redirect already cached in people's browsers. Writing that home page is a separate spec. Does not block." />
+<meta name="spec-decision" content="Does tea.laurelate.com redirect before it is deleted, or is it a clean break? Recommended: redirect. Rosetta asked for a clean break on the earlier rosettawang move, but that hostname was never the live site and this one is, so the cases differ. The Worker can 301 it for one line of code, which costs nothing and avoids a dead-link window. Delete the DNS record 30 days later. Does not block the move itself." />
+<meta name="spec-blocker" content="Oct 2, 2026. NOT YET STARTED, and it cannot finish before off-netlify-onto-cloudflare reaches phase 5, because apothecaryforest.com does not resolve until that zone is added. TWO THINGS WILL NEED ROSETTA at the end, neither gating the build: (1) add tea.laurelate.com as a custom domain on the forest-apothecary Worker, so the 301 is served by Cloudflare rather than by the Netlify site being retired, which needs her Cloudflare dashboard; (2) 30 days later, delete the tea CNAME from the laurelate.com zone in Cloudflare. Everything else, the file move, the base tag, the Worker rules, the sitemap, can be built and proved on workers.dev first." />
+<meta name="spec-verify" content="test -f recommend/index.html &amp;&amp; grep -q 'base href' recommend/index.html &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/recommend) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://apothecaryforest.com/support.js) = 200 &amp;&amp; test $(curl -sS -o /dev/null -w %{http_code} --max-time 20 https://tea.laurelate.com/) = 000" />
+<title>Moving the recommender onto its own path</title>
+<link rel="stylesheet" href="spec.css" />
+</head>
+<body>
+
+<div class="internal">Internal planning document · <b>not part of the app</b> · never deploy <code>specs/</code></div>
+
+<div class="wrap" id="top">
+
+<h1>Moving the recommender onto its own path</h1>
+<p class="meta">Status: open, not started · written Oct 2, 2026 against the live Worker and the laurelate.com DNS zone</p>
+<p class="lede">Goal: the herbalist recommender answers at <strong>apothecaryforest.com/recommend</strong>, and <strong>tea.laurelate.com stops existing</strong>. The root of the new domain is freed for whatever the Apothecary should actually open with.</p>
+
+<div class="callout warn">
+  <h4>This is not a file move, because the app addresses its assets relatively</h4>
+  <p>
+    <code>index.html</code> holds <strong>20 relative references</strong>: <code>src="./support.js"</code>,
+    <code>src="assets/flower.png"</code>, <code>url('assets/texture-baked.jpg?v=2')</code> and so on.
+    Those resolve against the directory the page is served from. Move the file to
+    <code>/recommend/</code> untouched and every one of them starts asking for
+    <code>/recommend/support.js</code> and <code>/recommend/assets/…</code>, none of which exist. The
+    app would load as an unstyled blank page with no runtime.
+  </p>
+  <p>
+    One <code>&lt;base href="/"&gt;</code> in the head fixes all 20 at once. That is the recommended
+    answer, and it matters that it is <em>one</em> line: the Worker's own comment records that
+    <code>index.html</code> is generated from a dc-runtime source that is not in this repo, so every
+    hand-edit to it is a patch living on borrowed time. A single obvious line survives a
+    regeneration review. Twenty rewritten paths do not.
+  </p>
+</div>
+
+<h2 id="state">Live state, Oct 2, 2026</h2>
+<table>
+  <tr><th>Thing</th><th>State</th></tr>
+  <tr>
+    <td><code>tea.laurelate.com</code></td>
+    <td>
+      The only working URL for the app. CNAME to <code>gorgeous-moxie-b6f8eb.netlify.app</code>,
+      resolving to Netlify. The <code>laurelate.com</code> zone is on Cloudflare
+      (<code>ryleigh</code> and <code>cullen</code> nameservers), so deleting the record is dashboard
+      work in an account Rosetta already has.
+    </td>
+  </tr>
+  <tr>
+    <td><code>apothecaryforest.com</code></td>
+    <td><strong>Does not resolve.</strong> The zone has not been added. See <a href="off-netlify-onto-cloudflare.html">the Cloudflare move</a>, which this waits on.</td>
+  </tr>
+  <tr>
+    <td>The Worker</td>
+    <td>
+      Live at <code>forest-apothecary.rosetta-760.workers.dev</code>, serving the site from static
+      assets and the twelve handlers. It already rewrites <code>www.</code> to the apex, so it has a
+      place for host rules to go.
+    </td>
+  </tr>
+  <tr>
+    <td>Internal files</td>
+    <td>
+      Blocked by <code>.assetsignore</code> rather than by redirects, so <code>specs</code>,
+      <code>scripts</code>, <code>src</code>, <code>CLAUDE.md</code> and <code>*.sql</code> are never
+      uploaded. Better than the Netlify arrangement, where they were uploaded and then hidden.
+      Nothing here changes that.
+    </td>
+  </tr>
+</table>
+
+<h2 id="shape">The shape of it</h2>
+<ol>
+  <li>
+    <strong>Move <code>index.html</code> to <code>recommend/index.html</code></strong> and add
+    <code>&lt;base href="/"&gt;</code> as the first element of its head, before any tag that
+    references an asset. Order matters: a <code>base</code> after a <code>link</code> does not apply
+    to it.
+  </li>
+  <li>
+    <strong>Leave every asset where it is.</strong> <code>support.js</code> and <code>assets/</code>
+    stay at the root, which is what the base tag now points at, and which is also what the static
+    shop and notes pages already use.
+  </li>
+  <li>
+    <strong>Add two rules to <code>src/worker.js</code></strong>, next to the existing
+    <code>www.</code> rewrite:
+    <ul>
+      <li><code>tea.laurelate.com/*</code> returns a <strong>301</strong> to <code>https://apothecaryforest.com/recommend</code>.</li>
+      <li><code>/</code> on the apex returns a <strong>302</strong> to <code>/recommend</code>, until a home page exists.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Update <code>sitemap.xml</code> and <code>robots.txt</code></strong>, which currently
+    name the old root.
+  </li>
+  <li>
+    <strong>Prove it on <code>workers.dev</code></strong> before any DNS changes. The move, the base
+    tag and both rules are all testable there.
+  </li>
+</ol>
+
+<div class="callout note">
+  <h4>Why the 302 at the root is deliberate</h4>
+  <p>
+    A 301 is cached by browsers aggressively and often indefinitely. Put one on <code>/</code> now
+    and the day a real home page ships, every returning visitor still bounces to
+    <code>/recommend</code> from their own cache, with nothing you can deploy to stop it. The 302
+    says the same thing to a crawler for this purpose and costs nothing later.
+  </p>
+</div>
+
+<h2 id="tea">Retiring tea.laurelate.com</h2>
+<p>
+  The redirect has to come from somewhere, and the obvious host is the one being switched off. If
+  the 301 lived on the Netlify site, Netlify would have to stay alive to serve it, which is the
+  opposite of what <a href="off-netlify-onto-cloudflare.html">the Cloudflare move</a> is for. So
+  <code>tea.laurelate.com</code> is added as a custom domain on the Worker, the Worker answers it
+  with the 301, and Netlify can be retired on schedule.
+</p>
+<p>
+  After 30 days, delete the <code>tea</code> CNAME from the <code>laurelate.com</code> zone. At that
+  point the hostname stops resolving and old links fail, which is the clean break, just taken in two
+  steps rather than one so that nobody following a bookmark in week one hits nothing.
+</p>
+
+<h2 id="phases">Phases</h2>
+<table>
+  <tr><th>#</th><th>Phase</th><th>Needs Rosetta?</th></tr>
+  <tr><td>1</td><td>Move the file, add the base tag, prove the app loads on workers.dev</td><td>No</td></tr>
+  <tr><td>2</td><td>Worker rules for the apex 302, sitemap and robots updated</td><td>No</td></tr>
+  <tr><td>3</td><td>Worker rule for the tea.laurelate.com 301, proved by sending the Host header directly</td><td>No</td></tr>
+  <tr><td>4</td><td>Add tea.laurelate.com as a custom domain on the Worker</td><td><strong>Yes, Cloudflare dashboard</strong></td></tr>
+  <tr><td>5</td><td>Thirty days later, delete the tea CNAME</td><td><strong>Yes, Cloudflare dashboard</strong></td></tr>
+</table>
+
+<h2 id="done">Done when</h2>
+<ul>
+  <li><code>apothecaryforest.com/recommend</code> serves the recommender, fully styled, with the chat working.</li>
+  <li><code>apothecaryforest.com/support.js</code> still returns 200, which is the cheap proof that the base tag is doing its job.</li>
+  <li><code>apothecaryforest.com/</code> sends a 302 to <code>/recommend</code>.</li>
+  <li><code>tea.laurelate.com</code> no longer resolves.</li>
+</ul>
+
+<p class="meta" style="margin-top:2.5rem">
+  What should actually live at the root is not decided here and is not this spec's business. This one
+  only gets the recommender out of the way.
+</p>
+
+</div>
+</body>
+</html>
